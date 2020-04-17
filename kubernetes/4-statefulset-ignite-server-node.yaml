@@ -1,0 +1,64 @@
+###########################################
+# Apache Ignite Server node (statefulSet) #
+###########################################
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ignite-server-node
+  namespace: my-mule4-stack
+  labels:
+    app: ignite-cluster-one
+spec:
+  serviceName: ignite-cluster-one-service
+  selector:
+    matchLabels:
+      app: ignite-cluster-one
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        # allow to discover this container as an Apache Ignite server node
+        # allow this container to be part of the load balanced ignite-cluster-one-service
+        app: ignite-cluster-one
+        # allow remote management by Spring Boot Admin server
+        spring-boot-managed: "true"
+    spec:
+      containers:
+        - image: docker.hawkore.com/k8s/spring-boot-apache-ignite-server:latest
+          imagePullPolicy: "Never"
+          name: ignite-server-node
+          env:
+            - name: LANG
+              value: 'C.UTF-8'
+            - name: USER_JVM_OPTS
+              value: '-server -Xms256M -Xmx512M
+              -DIGNITE_QUIET=false
+              -Dspring.application.name=ignite-server-node'
+          workingDir: /opt/ignite/
+          ports:
+            - containerPort: 47500 # discovery SPI port number, must match client discovery port
+            - containerPort: 8080 # Spring Boot port
+            - containerPort: 8888 # Spring Boot management port (actuator)
+          volumeMounts:
+            # mount volume to persist Ignite data
+            - mountPath: "/opt/ignite/work"
+              name: ignite-work
+          resources:
+            limits:
+              memory: "1Gi"
+          readinessProbe:
+            tcpSocket:
+              port: 8888
+            initialDelaySeconds: 90
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8888
+            initialDelaySeconds: 120
+            periodSeconds: 10
+      restartPolicy: Always
+      volumes:
+        - name: ignite-work
+          persistentVolumeClaim:
+            claimName: ignite-storage-claim

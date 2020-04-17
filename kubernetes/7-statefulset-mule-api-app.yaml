@@ -1,0 +1,64 @@
+################################################
+# Quiz REST Api Mule Application (statefulSet) #
+################################################
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mule-api-app
+  namespace: my-mule4-stack
+  labels:
+    app: mule-api-app
+spec:
+  serviceName: mule-api-app-service
+  selector:
+    matchLabels:
+      app: mule-api-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        # allow this container to be part of the load balanced mule-api-app-service
+        app: mule-api-app
+        # allow remote management by Spring Boot Admin server
+        spring-boot-managed: "true"
+    spec:
+      containers:
+        - image: docker.hawkore.com/k8s/spring-boot-mule4-runtime-ce:latest
+          imagePullPolicy: "Never"
+          name: mule-api-app
+          env:
+            - name: LANG
+              value: 'C.UTF-8'
+            - name: USER_JVM_OPTS
+              value: '-server -Xms128M -Xmx256M
+              -DIGNITE_QUIET=false
+              -Dspring.application.name=mule-api-app
+              -Dmule.apps=file:/opt/mule/shared/test-mule-api-1.0.0-mule-application.jar -Dmule.cleanStartup=true'
+          workingDir: /opt/mule/
+          ports:
+            - containerPort: 8081 # default mule HTTP connector port number.
+            - containerPort: 8888 # Spring Boot management port (actuator)
+          resources:
+            limits:
+              memory: "1Gi"
+          volumeMounts:
+            # mount shared volume to load Mule application
+            - mountPath: /opt/mule/shared
+              name: shared-storage
+              readOnly: true
+          readinessProbe:
+            tcpSocket:
+              port: 8888
+            initialDelaySeconds: 90
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8888
+            initialDelaySeconds: 120
+            periodSeconds: 10
+      restartPolicy: Always
+      volumes:
+        - name: shared-storage
+          persistentVolumeClaim:
+            claimName: shared-storage-claim

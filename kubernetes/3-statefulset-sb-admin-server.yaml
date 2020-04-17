@@ -1,0 +1,53 @@
+##########################################
+# Spring Boot Admin Server (statefulSet) #
+##########################################
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sb-admin-server
+  namespace: my-mule4-stack
+  labels:
+    app: sb-admin-server
+spec:
+  serviceName: sb-admin-server-service
+  selector:
+    matchLabels:
+      app: sb-admin-server
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: sb-admin-server
+        # allow own management
+        spring-boot-managed: "true"
+    spec:
+      containers:
+        - image: docker.hawkore.com/k8s/spring-boot-admin-server:latest
+          imagePullPolicy: "Never"
+          name: sb-admin-server
+          env:
+            - name: LANG
+              value: 'C.UTF-8'
+            - name: USER_JVM_OPTS
+              value: '-server -Xms128M -Xmx256M
+              -Dspring.boot.admin.ui.public-url=http://sbadmin.local
+              -Dspring.application.name=sb-admin-server'
+          workingDir: /opt/sba/
+          ports:
+            - containerPort: 8882 # Spring Boot port
+            - containerPort: 8888 # Spring Boot management port (actuator)
+          resources:
+            limits:
+              memory: "512Mi"
+          readinessProbe:
+            tcpSocket:
+              port: 8882
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8882
+            initialDelaySeconds: 120
+            periodSeconds: 10
+      restartPolicy: Always

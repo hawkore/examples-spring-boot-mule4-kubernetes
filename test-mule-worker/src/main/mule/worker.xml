@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd">
+	<flow name="ingest-flow-ensure-quiz-uniqueness" doc:id="4f4f7540-f09b-4e74-82ad-00866461c571" >
+		<apache-ignite:queue-listener doc:name="Receive QUIZ" doc:id="f253966f-4b8e-458e-bd67-d57a2ddddc12" config-ref="Apache_Ignite_Config" numberOfConsumers="1" queue="QUIZS_QUEUE" />
+		<apache-ignite:lock-scope doc:name="Distributed LOCK Scope: Avoid duplicated Quiz per surveyed" doc:id="a0482581-4ffd-4589-93ef-85b815923616" lock="INPUT_QUIZ_PROCESS_LOCK" timeout="-1" manager-ref="Connection_manager">
+			<set-variable value="#[payload]" doc:name="Set received payload into quiz variable" doc:id="b679fe26-7bc6-419b-92c0-a1a07539bbbb" variableName="quiz" />
+			<apache-ignite:query-sql doc:name="Check existing Quizs per surveyed's email" doc:id="3520771a-3caf-4ed3-8e84-07ee76c4d768" config-ref="Apache_Ignite_Config" queryParams-ref="#[[vars.quiz.email]]" target="existingQuiz" targetValue="#[payload[0].existing]">
+				<apache-ignite:sql-query >select count(*) as existing from &quot;quizCache&quot;.quiz where email like ?</apache-ignite:sql-query>
+			</apache-ignite:query-sql>
+			<choice doc:name="Whether Quiz should be processed or not" doc:id="dda05f2c-4107-4f00-be23-bb108e4f277d" >
+				<when expression="#[vars.existingQuiz == 0]">
+					<set-payload value="#[vars.quiz]" doc:name="Set quiz into payload" doc:id="cbeb21b0-2460-4b4d-9652-13815769d831" />
+					<flow-ref doc:name="Calls processing flow" doc:id="86ef5857-847e-447a-946d-42c75e9a6613" name="processing-quiz-flow"/>
+				</when>
+				<otherwise >
+					<apache-ignite:atomic-long-increment-and-get doc:name="Increment and Get TOTAL_DUPLICATED_QUIZS" doc:id="44047027-8878-45eb-96ac-fd1a76bdcb7d" config-ref="Apache_Ignite_Config" atomic="TOTAL_DUPLICATED_QUIZS"/>
+					<logger level="INFO" doc:name="Duplicate Quiz received" doc:id="64d4b9c4-aa64-476e-8805-03814dd2cf82" message="#['Seems that same user send more than one Quiz response!!. Current global duplicated Quiz: ' ++ payload as String]"/>
+				</otherwise>
+			</choice>
+		</apache-ignite:lock-scope>
+	</flow>
+	<flow name="processing-quiz-flow" doc:id="388cef64-b186-4a96-b737-539278f0eaaf" >
+		<set-variable value='#[%dw 2.0
+output application/java
+---
+{
+	email: payload.email,
+	yes: payload.yes,
+	no: payload.no,
+	na: payload.na,
+	qts: payload.qts,
+	apiIp: payload.apiIp,
+	workerIp: server.ip,
+	pts: now() as Number
+} as Object {
+	class : "org.hawkore.samples.api.quiz.entities.Quiz"
+}]' doc:name="Update quiz variable" doc:id="6442efa5-e3d7-496f-8303-f98be92c2515" variableName="quiz" />
+		<logger level="INFO" doc:name="log quiz" doc:id="3ba6552b-f5e8-4b33-9f7c-21bb09e9b49a" message="#[vars.quiz]"/>
+		<choice doc:name="Update Stats with new Quiz's data" doc:id="d30123a6-bd7f-4470-aed1-496d78840ed8" >
+			<when expression="#[vars.quiz.yes]">
+				<apache-ignite:atomic-long-increment-and-get doc:name="Increment TOTAL YES" doc:id="ec0ccd0d-d56a-4fe9-b7e8-45e91a02d444" config-ref="Apache_Ignite_Config" atomic="TOTAL_YES"/>
+			</when>
+			<when expression="#[vars.quiz.no]">
+				<apache-ignite:atomic-long-increment-and-get doc:name="Increment TOTAL NO" doc:id="a50af080-4191-4963-a01f-72a1d3cce881" config-ref="Apache_Ignite_Config" atomic="TOTAL_NO"/>
+			</when>
+			<otherwise >
+				<apache-ignite:atomic-long-increment-and-get doc:name="Increment TOTAL NA" doc:id="a2166c2a-b641-46c1-8295-6c20587fe323" config-ref="Apache_Ignite_Config" atomic="TOTAL_NA"/>
+			</otherwise>
+		</choice>
+		<apache-ignite:atomic-long-increment-and-get doc:name="Increment and Get TOTAL PROCESSED QUIZS" doc:id="5011f218-b666-4e53-b789-38ff36555fa8" config-ref="Apache_Ignite_Config" atomic="TOTAL_PROC_QUIZS" />
+		<logger level="INFO" doc:name="Log total processed" doc:id="d2868f6e-9d53-40fe-b849-30872681c397" message="#['Total processed QUIZS: ' ++ (payload default 0) as String]" />
+		<apache-ignite:cache-put cache="quizCache" doc:name="Store Quiz" doc:id="491af926-f363-434c-9c23-133d86a1a9a7" config-ref="Apache_Ignite_Config" key-ref="#[payload]" value-ref='#[vars.quiz]' async="true"/>
+	</flow>
+</mule>

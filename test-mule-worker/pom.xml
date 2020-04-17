@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><!--
+Copyright 2020 HAWKORE, S.L.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.hawkore.samples</groupId>
+  <artifactId>test-mule-worker</artifactId>
+  <version>1.0.0</version>
+  <packaging>mule-application</packaging>
+
+  <name>test-mule-worker</name>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <organization>
+    <name>HAWKORE, S.L.</name>
+    <url>https://www.hawkore.com</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <id>manuel.nunez</id>
+      <name>Manuel Núñez</name>
+      <email>manuel.nunez at hawkore dot com</email>
+    </developer>
+  </developers>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
+
+
+    <mule.api.version>1.1.1</mule.api.version>
+    <mule.maven.plugin.version>3.3.5</mule.maven.plugin.version>
+
+    <apache.ignite.connector.version>2.6.2</apache.ignite.connector.version>
+
+    <ignite.version>2.7.6</ignite.version>
+    <spring.version>5.1.6.RELEASE</spring.version>
+    <spring.security.version>5.1.6.RELEASE</spring.security.version>
+
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.mule.tools.maven</groupId>
+        <artifactId>mule-maven-plugin</artifactId>
+        <version>${mule.maven.plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+
+          <!-- shared libraries as plugins dependencies -->
+          <sharedLibraries>
+            <sharedLibrary>
+              <groupId>org.springframework.security</groupId>
+              <artifactId>spring-security-core</artifactId>
+            </sharedLibrary>
+            <sharedLibrary>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-beans</artifactId>
+            </sharedLibrary>
+            <sharedLibrary>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-context</artifactId>
+            </sharedLibrary>
+            <sharedLibrary>
+              <groupId>org.springframework.security</groupId>
+              <artifactId>spring-security-config</artifactId>
+            </sharedLibrary>
+            <sharedLibrary>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-core</artifactId>
+            </sharedLibrary>
+            <sharedLibrary>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-aop</artifactId>
+            </sharedLibrary>
+            <sharedLibrary>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-expression</artifactId>
+            </sharedLibrary>
+            <sharedLibrary>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-jdbc</artifactId>
+            </sharedLibrary>
+            <sharedLibrary>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-tx</artifactId>
+            </sharedLibrary>
+            <sharedLibrary>
+              <groupId>org.apache.ignite</groupId>
+              <artifactId>ignite-core</artifactId>
+            </sharedLibrary>
+            <sharedLibrary>
+              <groupId>org.apache.ignite</groupId>
+              <artifactId>ignite-indexing</artifactId>
+            </sharedLibrary>
+            <sharedLibrary>
+              <groupId>org.apache.ignite</groupId>
+              <artifactId>ignite-kubernetes</artifactId>
+            </sharedLibrary>
+            <sharedLibrary>
+              <groupId>org.apache.ignite</groupId>
+              <artifactId>ignite-slf4j</artifactId>
+            </sharedLibrary>
+            <sharedLibrary>
+              <groupId>org.apache.ignite</groupId>
+              <artifactId>ignite-schedule</artifactId>
+            </sharedLibrary>
+            <sharedLibrary>
+              <groupId>org.apache.ignite</groupId>
+              <artifactId>ignite-spring</artifactId>
+            </sharedLibrary>
+            <sharedLibrary>
+              <groupId>org.apache.ignite</groupId>
+              <artifactId>ignite-spring</artifactId>
+            </sharedLibrary>
+          </sharedLibraries>
+          <classifier>mule-application</classifier>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>com.hawkore.mule.extensions</groupId>
+      <artifactId>apache-ignite-extension</artifactId>
+      <version>${apache.ignite.connector.version}</version>
+      <classifier>mule-plugin</classifier>
+    </dependency>
+
+    <!-- Updated Apache Ignite dependencies -->
+
+    <dependency>
+      <groupId>org.apache.ignite</groupId>
+      <artifactId>ignite-core</artifactId>
+      <version>${ignite.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.ignite</groupId>
+      <artifactId>ignite-indexing</artifactId>
+      <version>${ignite.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.ignite</groupId>
+      <artifactId>ignite-spring</artifactId>
+      <version>${ignite.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.ignite</groupId>
+      <artifactId>ignite-schedule</artifactId>
+      <version>${ignite.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.ignite</groupId>
+      <artifactId>ignite-slf4j</artifactId>
+      <version>${ignite.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.ignite</groupId>
+      <artifactId>ignite-kubernetes</artifactId>
+      <version>${ignite.version}</version>
+    </dependency>
+
+    <!-- Hawkore's Apache ignite connector, we will use it for data ingestion implementation -->
+
+    <dependency>
+      <groupId>com.hawkore.ignite.extensions</groupId>
+      <artifactId>hk-ignite-connector</artifactId>
+      <version>${apache.ignite.connector.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mule.connectors</groupId>
+      <artifactId>mule-http-connector</artifactId>
+      <version>1.5.11</version>
+      <classifier>mule-plugin</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.mule.connectors</groupId>
+      <artifactId>mule-sockets-connector</artifactId>
+      <version>1.1.5</version>
+      <classifier>mule-plugin</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-core</artifactId>
+      <version>${spring.security.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-config</artifactId>
+      <version>${spring.security.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-aop</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-expression</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-jdbc</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-tx</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.6</version>
+    </dependency>
+  </dependencies>
+
+  <repositories>
+    <repository>
+      <id>public.hawkore.releases</id>
+      <name>Hawkore Public Repository</name>
+      <url>https://repository.hawkore.com/maven2/</url>
+      <layout>default</layout>
+    </repository>
+    <repository>
+      <id>mulesoft-releases</id>
+      <name>MuleSoft Releases Repository</name>
+      <url>https://repository.mulesoft.org/releases/</url>
+      <layout>default</layout>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>mulesoft-releases</id>
+      <name>mulesoft release repository</name>
+      <layout>default</layout>
+      <url>https://repository.mulesoft.org/releases/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+
+</project>

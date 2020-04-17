@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+  xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+  xmlns:http="http://www.mulesoft.org/schema/mule/http"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd">
+  <flow name="post:\quiz:quiz-api-config">
+		<set-variable value="#[%dw 2.0
+output application/java
+---
+{
+	email: attributes.queryParams.email,
+	na: attributes.queryParams.selected == 'na',
+	yes: attributes.queryParams.selected == 'yes',
+	no: attributes.queryParams.selected == 'no',
+	qts: now() as Number,
+	apiIp: server.ip
+} as Object {
+	class : &quot;org.hawkore.samples.api.quiz.entities.Quiz&quot;
+}]" doc:name="Create a new QUIZ" doc:id="71bfc3b3-93d5-4791-8f33-965bd0a07039" variableName="quiz" />
+		<async doc:name="Async" doc:id="4d850c35-738a-4b2e-9f02-ecfcef1253fc" >
+			<apache-ignite:atomic-long-increment-and-get doc:name="Increment and Get TOTAL_RECEIVED_QUIZS" doc:id="66583106-5891-424f-abac-77b043070740" config-ref="Apache_Ignite_Config" atomic="TOTAL_REC_QUIZS" />
+			<logger level="INFO" message="#['Total received: ' ++ (payload default 0) as String]" />
+			<apache-ignite:queue-publish doc:name="Sends QUIZ to be processed by workers" doc:id="a3d74a2e-5b1a-4e8e-b8d9-a46bda5b159b" config-ref="Apache_Ignite_Config" item-ref="#[vars.quiz]" queue="QUIZS_QUEUE" />
+		</async>
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+{
+	message:'Thanks!!'
+}]" doc:name="message to user" doc:id="306750aa-0437-429d-b5ed-9ce3abbc0059" />
+  </flow>
+    <flow name="get:\quiz:quiz-api-config">
+		<apache-ignite:query-sql doc:name="List QUIZ paginated" doc:id="05016453-b34c-45e7-be60-cfeb5df35ff4" config-ref="Apache_Ignite_Config">
+			<apache-ignite:sql-query >select _key as id, * from &quot;quizCache&quot;.quiz</apache-ignite:sql-query>
+			<apache-ignite:page pageNumber="#[attributes.queryParams.page as Number]" pageSize="#[attributes.queryParams.pageSize as Number]"/>
+		</apache-ignite:query-sql>
+		<set-payload value='#[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -&gt; {
+	id: payload01.id default 0,
+	email: payload01.email default "",
+	yes: payload01.yes default true,
+	no: payload01.no default true,
+	na: payload01.na default true,
+	qts: payload01.qts default 0,
+	pts: payload01.pts default 0,
+	apiIp: payload01.apiIp default "",
+	workerIp: payload01.workerip default ""
+}]' doc:name="List to JSON array" doc:id="10ba7887-ef86-4f13-a548-542b8bcb980b" />
+    </flow>
+    <flow name="delete:\quiz:quiz-api-config">
+		<apache-ignite:cache-clear doc:name="Clear QUIZS" doc:id="191f9eb6-0a07-4b60-99df-03b42a277a7f" config-ref="Apache_Ignite_Config" cache="QUIZS"/>
+		<apache-ignite:atomic-long-get-and-set doc:id="e8efb2ba-6598-46c1-8cb6-1f29b7a588c8" config-ref="Apache_Ignite_Config" atomic="TOTAL_REC_QUIZS" doc:name="Reset TOTAL RECEIVED QUIZS" valueToSet="#[0]"/>
+		<apache-ignite:atomic-long-get-and-set doc:id="abaaecf6-268f-4d1f-a510-d0afe8bb6e04" config-ref="Apache_Ignite_Config" atomic="TOTAL_PROC_QUIZS" doc:name="Reset TOTAL PROCESSED QUIZS" valueToSet="#[0]" target="totalProcessed"/>
+		<apache-ignite:atomic-long-get-and-set doc:id="a2ec4971-1835-447a-83bc-56f55c6a43a2" config-ref="Apache_Ignite_Config" atomic="TOTAL_DUPLICATED_QUIZS" doc:name="Get TOTAL DUPLICATED QUIZS" valueToSet="#[0]" target="totalDuplicated"/>
+		<apache-ignite:atomic-long-get-and-set doc:id="d9ff6930-e2e6-48e9-81c6-54a59841253e" config-ref="Apache_Ignite_Config" atomic="TOTAL_YES" doc:name="Reset TOTAL YES QUIZS" valueToSet="#[0]"/>
+		<apache-ignite:atomic-long-get-and-set doc:id="d8bc68e8-5fab-493a-93b5-7442ed1ea15f" config-ref="Apache_Ignite_Config" atomic="TOTAL_NO" doc:name="Reset TOTAL NO QUIZS" valueToSet="#[0]"/>
+		<apache-ignite:atomic-long-get-and-set doc:id="174ff900-cfd7-40c7-86d9-7df76c1ec97d" config-ref="Apache_Ignite_Config" atomic="TOTAL_NA" doc:name="Reset TOTAL NA QUIZS" valueToSet="#[0]"/>
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+{
+	deleted: vars.totalProcessed
+}]" doc:name="Build stats JSON" doc:id="3f2548b5-3c24-4b7d-9204-13575b0398ab" />
+    </flow>
+    <flow name="get:\quiz\stats:quiz-api-config">
+		<apache-ignite:atomic-long-get doc:id="6ef66338-22ae-427d-a630-c4888fc79285" config-ref="Apache_Ignite_Config" atomic="TOTAL_REC_QUIZS" doc:name="Get TOTAL RECEIVED QUIZS" target="totalReceived"/>
+		<apache-ignite:atomic-long-get doc:id="932a74ee-0f55-4561-9714-3445ab082f6d" config-ref="Apache_Ignite_Config" atomic="TOTAL_PROC_QUIZS" doc:name="Get TOTAL PROCESSED QUIZS" target="totalProcessed"/>
+		<apache-ignite:atomic-long-get doc:id="15cceac5-e100-4e6e-b414-6fed839d5c73" config-ref="Apache_Ignite_Config" atomic="TOTAL_DUPLICATED_QUIZS" doc:name="Get TOTAL DUPLICATED QUIZS" target="totalDuplicated"/>
+		<apache-ignite:atomic-long-get doc:id="0144d5de-ece1-445a-b07b-c846467125d0" config-ref="Apache_Ignite_Config" atomic="TOTAL_YES" doc:name="Get TOTAL YES QUIZS" target="totalYes"/>
+		<apache-ignite:atomic-long-get doc:id="83c42895-e642-4156-8892-ec74b42a9903" config-ref="Apache_Ignite_Config" atomic="TOTAL_NO" doc:name="Get TOTAL NO QUIZS" target="totalNo"/>
+		<apache-ignite:atomic-long-get doc:id="ba2f93e6-2c24-4eae-b28d-0de29aa0ee45" config-ref="Apache_Ignite_Config" atomic="TOTAL_NA" doc:name="Get TOTAL NA QUIZS" target="totalNa"/>
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+{
+	totalYes: vars.totalYes,
+	totalNo: vars.totalNo,
+	totalNa: vars.totalNa,
+	totalReceived: vars.totalReceived,
+	totalProcessed: vars.totalProcessed,
+	totalDuplicated: vars.totalDuplicated
+}]" doc:name="Build stats JSON" doc:id="3f2548b5-3c24-4b7d-9204-13575b0399db" />
+    </flow>
+</mule>

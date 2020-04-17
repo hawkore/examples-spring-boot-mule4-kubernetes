@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!-- Ignite configuration for a mule node -->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <!-- Ignite configuration -->
+  <bean id="ignite-config" class="org.apache.ignite.configuration.IgniteConfiguration">
+
+    <property name="gridName" value="sbadmin-ignite-grid" />
+    <property name="clientMode" value="false" />
+    <property name="workDirectory" value="/opt/ignite/work" />
+    <property name="peerClassLoadingEnabled" value="false" />
+
+    <property name="publicThreadPoolSize" value="4" />
+    <property name="systemThreadPoolSize" value="4" />
+    <property name="stripedPoolSize" value="4" />
+    <property name="queryThreadPoolSize" value="4" />
+
+    <property name="rebalanceThreadPoolSize" value="2" />
+
+    <property name="systemWorkerBlockedTimeout" value="60000" />
+    <property name="failureDetectionTimeout" value="60000" />
+    <property name="segmentationPolicy" value="STOP" />
+    <property name="segmentationResolveAttempts" value="5" />
+
+    <property name="metricsLogFrequency" value="0" />
+
+    <!-- Durable memory configuration for this Apache Ignite node. The durable memory is a manageable off-heap based memory architecture-->
+    <property name="dataStorageConfiguration">
+      <bean class="org.apache.ignite.configuration.DataStorageConfiguration">
+        <!-- Default initial size of a memory chunk for the system cache (40 MB) -->
+        <property name="systemRegionInitialSize" value="#{40l * 1024 * 1024}" />
+
+        <!-- Default max size of a memory chunk for the system cache (100 MB) -->
+        <property name="systemRegionMaxSize" value="#{100l * 1024 * 1024}" />
+
+        <!-- Enable write throttling. -->
+        <property name="writeThrottlingEnabled" value="true" />
+
+        <!-- Set the page size to 4 KB -->
+        <property name="pageSize" value="#{4 * 1024}" />
+
+        <!-- default 180_000 -->
+        <property name="checkpointFrequency" value="60000" />
+
+        <!-- Changing WAL Mode. -->
+        <property name="walMode" value="LOG_ONLY" />
+
+        <!-- Default 64MB on disk -->
+        <property name="walSegmentSize" value="#{64L * 1024 * 1024}" />
+
+        <!-- disk storage location -->
+        <property name="storagePath" value="/opt/ignite/work/ignite/persistence" />
+        <property name="walPath" value="/opt/ignite/work/ignite/wal" />
+        <property name="walArchivePath" value="/opt/ignite/work/ignite/archive" />
+
+        <!-- In memory storage -->
+        <property name="defaultDataRegionConfiguration">
+          <bean class="org.apache.ignite.configuration.DataRegionConfiguration">
+            <property name="name" value="default" />
+            <property name="initialSize" value="#{100l * 1024 * 1024}" />
+            <property name="maxSize" value="#{256l * 1024 * 1024}" />
+            <property name="persistenceEnabled" value="false" />
+          </bean>
+        </property>
+      </bean>
+    </property>
+
+    <!-- Explicitly configure TCP discovery SPI -->
+    <property name="discoverySpi">
+      <bean class="org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi">
+        <!--
+          Must be default local port 47500, otherwise ignite client nodes will be unable to find server nodes
+        -->
+        <property name="localPort" value="47500" />
+        <property name="localPortRange" value="1" />
+        <property name="ipFinder">
+          <!--
+          Enables Kubernetes IP finder and set custom namespace name and service name (cluster).
+          -->
+          <bean class="org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder">
+            <property name="shared" value="true" />
+            <property name="namespace" value="my-mule4-stack"/>
+            <property name="serviceName" value="sb-admin-server-service"/>
+          </bean>
+        </property>
+      </bean>
+    </property>
+
+    <property name="gridLogger">
+      <bean class="org.apache.ignite.logger.slf4j.Slf4jLogger" />
+    </property>
+
+  </bean>
+
+</beans>

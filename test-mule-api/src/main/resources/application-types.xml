@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="quiz" format="json">
+      <types:shape format="weave" example="examples/quiz.json"><![CDATA[%dw 2.0
+
+type quiz = {|
+  email: String,
+  yes: Boolean,
+  no: Boolean,
+  na: Boolean,
+  qts: Number {"typeId": "int"},
+  pts: Number {"typeId": "int"},
+  workerIp: String,
+  apiIp: String
+|} {"example": "{\\\"email\\\":\\\"user@email.com\\\",\\\"yes\\\":false,\\\"no\\\":false,\\\"na\\\":false,\\\"qts\\\":0,\\\"pts\\\":0,\\\"workerIp\\\":\\\"127.0.0.1\\\",\\\"apiIp\\\":\\\"127.0.0.1\\\"}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="quizJava" format="java">
+      <types:shape format="java" element="org.hawkore.samples.api.quiz.entities.Quiz"/>
+    </types:type>
+    <types:type name="quizList" format="json">
+      <types:shape format="weave" example="examples/quizs.json"><![CDATA[%dw 2.0
+
+type quizList = Array<{|  id: Number {"typeId": "int"},   email: String,   yes: Boolean,   no: Boolean,   na: Boolean,   qts: Number {"typeId": "int"},   pts: Number {"typeId": "int"},   workerIp: String|}> {"example": "[{\\\"id\\\":0,\\\"email\\\":\\\"\\\",\\\"yes\\\":false,\\\"no\\\":false,\\\"na\\\":false,\\\"qts\\\":0,\\\"pts\\\":0,\\\"workerIp\\\":\\\"\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="Stats" format="json">
+      <types:shape format="weave" example="examples/stats.json"><![CDATA[%dw 2.0
+
+type Stats = {|
+  totalYes: Number {"typeId": "int"},
+  totalNo: Number {"typeId": "int"},
+  totalNa: Number {"typeId": "int"},
+  totalReceived: Number {"typeId": "int"},
+  totalProcessed: Number {"typeId": "int"}
+|} {"example": "{\\\"totalYes\\\":0,\\\"totalNo\\\":0,\\\"totalNa\\\":0,\\\"totalReceived\\\":0,\\\"totalProcessed\\\":0}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#edda5341-1c46-42dd-ad80-81d2df0ec5d4">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="quiz"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+    <types:operation-declaration>
+      <types:inputs>
+        <types:parameter name="value" type="quizJava"/>
+      </types:inputs>
+    </types:operation-declaration>
+  </types:enrichment>
+  <types:enrichment select="#269af773-0f1a-4c09-98e9-1e22c11c8d0e">
+    <types:operation-declaration>
+      <types:inputs>
+        <types:parameter name="value" type="quizList"/>
+      </types:inputs>
+    </types:operation-declaration>
+  </types:enrichment>
+  <types:enrichment select="#186f275d-ef23-451c-9c65-f466e4646d90">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="quizJava"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+    <types:operation-declaration>
+      <types:inputs>
+        <types:parameter name="value" type="quiz"/>
+      </types:inputs>
+    </types:operation-declaration>
+  </types:enrichment>
+  <types:enrichment select="#71bfc3b3-93d5-4791-8f33-965bd0a07039">
+    <types:operation-declaration>
+      <types:inputs>
+        <types:parameter name="value" type="quizJava"/>
+      </types:inputs>
+    </types:operation-declaration>
+  </types:enrichment>
+  <types:enrichment select="#3f2548b5-3c24-4b7d-9204-13575b0399db">
+    <types:operation-declaration>
+      <types:inputs>
+        <types:parameter name="value" type="Stats"/>
+      </types:inputs>
+    </types:operation-declaration>
+  </types:enrichment>
+</types:mule>

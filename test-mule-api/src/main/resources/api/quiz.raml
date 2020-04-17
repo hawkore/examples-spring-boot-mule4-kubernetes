@@ -1,0 +1,199 @@
+#%RAML 1.0
+title: Sample Quiz API
+baseUri: http://mule-api.local/api
+
+mediaType: application/json
+
+/quiz:
+  post:
+    description: Store quiz
+    body:
+      application/json:
+        type: nil
+    queryParameters:
+      email:
+       type: string
+       pattern: ^.+@.+\..+$
+       required: true
+      selected:
+       type: string
+       enum: [ yes, no, na ]
+       required: true
+    responses:
+      200:
+        body:
+          application/json:
+             example: |
+              {"message": "message to user" }
+      400:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      404:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      405:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      406:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      415:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      500:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      501:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+  get:
+    description: List quizs
+    queryParameters:
+          page?:
+            description: page number
+            type: integer
+            default: 0
+          pageSize?:
+            description: page size
+            type: integer
+            default: 10
+    responses:
+      200:
+        body:
+          application/json:
+             example:  !include ../examples/quizs.json
+      400:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      404:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      405:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      406:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      415:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      500:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      501:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+  delete:
+    description: Clear all quizs and stats
+    responses:
+      200:
+        body:
+          application/json:
+             example: |
+              {"deleted": 0 }
+      400:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      404:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      405:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      406:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      415:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      500:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+      501:
+        body:
+          application/json:
+             example: |
+              {"message": "error message" }
+  /stats:
+    get:
+      description: Global stats
+      responses:
+        200:
+          body:
+            application/json:
+               example:  !include ../examples/stats.json
+        400:
+          body:
+            application/json:
+               example: |
+                {"message": "error message" }
+        404:
+          body:
+            application/json:
+               example: |
+                {"message": "error message" }
+        405:
+          body:
+            application/json:
+               example: |
+                {"message": "error message" }
+        406:
+          body:
+            application/json:
+               example: |
+                {"message": "error message" }
+        415:
+          body:
+            application/json:
+               example: |
+                {"message": "error message" }
+        500:
+          body:
+            application/json:
+               example: |
+                {"message": "error message" }
+        501:
+          body:
+            application/json:
+               example: |
+                {"message": "error message" }

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><!--
+Copyright 2020 HAWKORE, S.L.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.hawkore.samples.distributions</groupId>
+  <artifactId>k8s-samples-builder</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+  <name>k8s-samples-builder</name>
+  <description>For build at once sample artifacts</description>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <organization>
+    <name>HAWKORE, S.L.</name>
+    <url>https://www.hawkore.com</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <id>manuel.nunez</id>
+      <name>Manuel Núñez</name>
+      <email>manuel.nunez at hawkore dot com</email>
+    </developer>
+  </developers>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.deploy.skip>true</maven.deploy.skip>
+    <maven.install.skip>true</maven.install.skip>
+  </properties>
+
+  <modules>
+    <module>spring-boot-admin-server</module>
+    <module>spring-boot-apache-ignite-server</module>
+    <module>spring-boot-mule4-runtime-ce</module>
+    <module>test-mule-api</module>
+    <module>test-mule-worker</module>
+  </modules>
+
+</project>

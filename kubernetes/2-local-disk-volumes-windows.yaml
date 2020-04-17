@@ -1,0 +1,80 @@
+########################################################
+# Local disk volume for windows host (testing purpose) #
+########################################################
+
+# Local disk volume for Apache Ignite server node persistence
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ignite-storage
+  namespace: my-mule4-stack
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/c/opt/k8s/ignite-work"
+    type: DirectoryOrCreate
+
+---
+
+# Volume claim that can be used ONLY by one Apache Ignite server node
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ignite-storage-claim
+  namespace: my-mule4-stack
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+
+---
+
+# Local disk volume to share resources
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: shared-storage
+  namespace: my-mule4-stack
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/c/opt/k8s/shared"
+    type: Directory
+
+
+---
+
+# Volume claim that can be used by many applications
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-storage-claim
+  namespace: my-mule4-stack
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 1Gi

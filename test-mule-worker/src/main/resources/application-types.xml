@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="quizJava" format="java">
+      <types:shape format="java" element="org.hawkore.samples.api.quiz.entities.Quiz"/>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#491af926-f363-434c-9c23-133d86a1a9a7">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:variables>
+          <types:variable name="quiz" type="quizJava"/>
+        </types:variables>
+      </types:input-event>
+    </types:processor-declaration>
+    <types:operation-declaration>
+      <types:inputs>
+        <types:parameter name="value-ref" type="quizJava"/>
+      </types:inputs>
+    </types:operation-declaration>
+  </types:enrichment>
+  <types:enrichment select="#6442efa5-e3d7-496f-8303-f98be92c2515">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="quizJava"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+    <types:operation-declaration>
+      <types:inputs>
+        <types:parameter name="value" type="quizJava"/>
+      </types:inputs>
+    </types:operation-declaration>
+  </types:enrichment>
+</types:mule>

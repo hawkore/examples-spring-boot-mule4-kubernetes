@@ -1,0 +1,10 @@
+{
+  "email": "user@email.com",
+  "yes": false,
+  "no": false,
+  "na": false,
+  "qts": 0,
+  "pts": 0,
+  "apiIp": "127.0.0.1",
+  "workerIp": "127.0.0.1"
+}

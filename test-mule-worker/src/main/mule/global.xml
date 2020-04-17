@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd">
+	<apache-ignite:connection-manager name="Connection_manager" doc:name="Connection manager" doc:id="e9a16403-5aee-4a57-a436-abd45b9960a7" igniteSpringCfgFile="ignite-config.xml" >
+		<apache-ignite:cache-defs >
+			<apache-ignite:cache-def cacheName="quizCache" >
+				<apache-ignite:cache-config >
+					<apache-ignite:bean-reference-cache-config beanRef="quiz-cache" />
+				</apache-ignite:cache-config>
+			</apache-ignite:cache-def>
+		</apache-ignite:cache-defs>
+		<apache-ignite:queue-defs >
+			<apache-ignite:queue-def queueName="QUIZS_QUEUE" >
+				<apache-ignite:collection-config >
+					<apache-ignite:simple-collection-configuration cacheMode="PARTITIONED" atomicityMode="TRANSACTIONAL" backups="1" />
+				</apache-ignite:collection-config>
+			</apache-ignite:queue-def>
+		</apache-ignite:queue-defs>
+		<apache-ignite:atomic-long-defs >
+			<apache-ignite:atomic-long-def atomicName="TOTAL_PROC_QUIZS" >
+				<apache-ignite:atomic-config >
+					<apache-ignite:simple-atomic-configuration cacheMode="REPLICATED" />
+				</apache-ignite:atomic-config>
+			</apache-ignite:atomic-long-def>
+			<apache-ignite:atomic-long-def atomicName="TOTAL_REC_QUIZS" >
+				<apache-ignite:atomic-config >
+					<apache-ignite:simple-atomic-configuration cacheMode="REPLICATED" />
+				</apache-ignite:atomic-config>
+			</apache-ignite:atomic-long-def>
+			<apache-ignite:atomic-long-def atomicName="TOTAL_DUPLICATED_QUIZS" >
+				<apache-ignite:atomic-config >
+					<apache-ignite:simple-atomic-configuration cacheMode="REPLICATED" />
+				</apache-ignite:atomic-config>
+			</apache-ignite:atomic-long-def>
+			<apache-ignite:atomic-long-def atomicName="TOTAL_YES" >
+				<apache-ignite:atomic-config >
+					<apache-ignite:simple-atomic-configuration cacheMode="REPLICATED" />
+				</apache-ignite:atomic-config>
+			</apache-ignite:atomic-long-def>
+			<apache-ignite:atomic-long-def atomicName="TOTAL_NO" >
+				<apache-ignite:atomic-config >
+					<apache-ignite:simple-atomic-configuration cacheMode="REPLICATED" />
+				</apache-ignite:atomic-config>
+			</apache-ignite:atomic-long-def>
+			<apache-ignite:atomic-long-def atomicName="TOTAL_NA" >
+				<apache-ignite:atomic-config >
+					<apache-ignite:simple-atomic-configuration cacheMode="REPLICATED" />
+				</apache-ignite:atomic-config>
+			</apache-ignite:atomic-long-def>
+		</apache-ignite:atomic-long-defs>
+		<apache-ignite:lock-defs >
+			<apache-ignite:lock-def lockName="INPUT_QUIZ_PROCESS_LOCK" />
+		</apache-ignite:lock-defs>
+	</apache-ignite:connection-manager>
+	<apache-ignite:config name="Apache_Ignite_Config" doc:name="Apache Ignite Config" doc:id="e7675788-72ef-4f67-ad4b-9e7d15b04572" >
+		<apache-ignite:connection manager-ref="Connection_manager" />
+	</apache-ignite:config>
+</mule>

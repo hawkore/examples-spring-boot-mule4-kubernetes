@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!-- Ignite configuration for a mule node -->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean name="quiz-cache" id="quiz-cache" class="org.apache.ignite.configuration.CacheConfiguration">
+		<property name="name" value="quizCache" />
+		<property name="cacheMode" value="PARTITIONED" />
+		<property name="indexedTypes">
+			<array>
+				<value>java.lang.Long</value>
+				<value>org.hawkore.samples.api.quiz.entities.Quiz</value>
+			</array>
+		</property>
+	</bean>
+
+  <!-- Ignite configuration -->
+  <bean id="ignite-config" class="org.apache.ignite.configuration.IgniteConfiguration">
+
+    <property name="gridName" value="ignite-grid-one" />
+    <property name="clientMode" value="true" />
+    <property name="peerClassLoadingEnabled" value="false" />
+
+    <property name="metricsLogFrequency" value="0" />
+
+	<property name="cacheConfiguration">
+		<list>
+			<ref bean="quiz-cache"/>
+		</list>
+	</property>
+
+    <!-- Explicitly configure TCP discovery SPI -->
+    <property name="discoverySpi">
+      <bean class="org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi">
+        <property name="ipFinder">
+          <!--
+          Enables Kubernetes IP finder and set custom namespace name and service name (cluster).
+          -->
+          <bean class="org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder">
+            <property name="shared" value="true" />
+            <property name="namespace" value="my-mule4-stack"/>
+            <property name="serviceName" value="ignite-cluster-one-service"/>
+          </bean>
+        </property>
+      </bean>
+    </property>
+
+    <property name="gridLogger">
+      <bean class="org.apache.ignite.logger.slf4j.Slf4jLogger" />
+    </property>
+
+  </bean>
+
+</beans>

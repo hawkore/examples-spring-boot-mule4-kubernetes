@@ -1,0 +1,193 @@
+##################################################
+# Mandatory kubernetes artifacts for this sample #
+##################################################
+
+# namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: my-mule4-stack
+
+---
+
+# Service (Load balancer) for ignite servers: TCP cluster discovery, spring services and spring boot management (actuator)
+apiVersion: v1
+kind: Service
+metadata:
+  # The name must be equal to TcpDiscoveryKubernetesIpFinder.serviceName
+  name: ignite-cluster-one-service
+  namespace: my-mule4-stack
+  labels:
+    app: ignite-cluster-one
+    spring-boot-managed: "true"
+spec:
+  ports:
+    - name: "spring-http"
+      port: 8080
+      targetPort: 8080
+    - name: "management"
+      port: 8888
+      protocol: TCP
+  selector:
+    # Must be equal to the label set for Ignite containers.
+    app: ignite-cluster-one
+
+---
+
+# Service (Load balancer) for Quiz REST Api: api endpoints, RAML console and spring boot management (actuator)
+apiVersion: v1
+kind: Service
+metadata:
+  name: mule-api-app-service
+  namespace: my-mule4-stack
+  labels:
+    app: mule-api-app
+    spring-boot-managed: "true"
+spec:
+  ports:
+    - name: "mule-http"
+      port: 8081
+      targetPort: 8081
+    - name: "management"
+      port: 8888
+      protocol: TCP
+  selector:
+    app: mule-api-app
+
+---
+
+# Service (Load balancer) for Worker: spring boot management (actuator)
+apiVersion: v1
+kind: Service
+metadata:
+  name: mule-worker-app-service
+  namespace: my-mule4-stack
+  labels:
+    app: mule-worker-app
+    spring-boot-managed: "true"
+spec:
+  ports:
+    - name: "management"
+      port: 8888
+      protocol: TCP
+  selector:
+    app: mule-worker-app
+
+---
+
+# Service (Load balancer) for Spring Boot Admin Server web console
+apiVersion: v1
+kind: Service
+metadata:
+  name: sb-admin-server-service
+  namespace: my-mule4-stack
+  labels:
+    app: sb-admin-server
+    # allow remote management by Spring Boot Admin server
+    spring-boot-managed: "true"
+spec:
+  ports:
+    - name: "spring-http"
+      port: 8882
+      targetPort: 8882
+    - name: "management"
+      port: 8888
+      protocol: TCP
+  selector:
+    app: sb-admin-server
+
+---
+
+# Config Map for Spring Boot Admin Server to auto-discover spring boot applications to manage
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sb-admin-server
+  namespace: my-mule4-stack
+data:
+  application.yml: |-
+    spring:
+     cloud:
+      kubernetes:
+        discovery:
+          all-namespaces: true
+          service-labels:
+            spring-boot-managed: true
+
+---
+
+# Ingress for Spring Boot Admin Server: exposes admin console on host port 80 with virtual host name sbadmin.local
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: sb-admin-server-ingress
+  namespace: my-mule4-stack
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: '0'
+spec:
+  rules:
+    - host: sbadmin.local
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: sb-admin-server-service
+              servicePort: 8882
+
+---
+
+# Ingress for Quiz REST Api: exposes api services and RAML console on host port 80 with virtual host name mule-api.local
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: mule-api-app-ingress
+  namespace: my-mule4-stack
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: '0'
+spec:
+  rules:
+    - host: mule-api.local
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: mule-api-app-service
+              servicePort: 8081
+
+---
+
+# Ingress for Ignite server services: exposes spring REST services on host port 80 with virtual host name ignite-rest.local
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ignite-rest-ingress
+  namespace: my-mule4-stack
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: '0'
+spec:
+  rules:
+    - host: ignite-rest.local
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: ignite-cluster-one-service
+              servicePort: 8080
+
+---
+
+# Default memory limit range when not specified
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: mem-limit-range
+spec:
+  limits:
+    - default:
+        memory: 512Mi
+      defaultRequest:
+        memory: 256Mi
+      type: Container
