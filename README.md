@@ -188,7 +188,7 @@ Open your browser and play with [Quiz REST Api console](http://mule-api.local/co
     ![mule-api-app-post-flow](docs/assets/mule-api-app-post-flow.png)
 
 - Workers will listen on that distributed Queue for new Quiz Responses to process:
-    - Ensures Quiz responses per surveyed (distributed LOCK scope).
+    - Avoid more than one Quiz response per surveyed (distributed LOCK scope).
     - Update Quiz Responses with additional data.
     - Store Quiz Responses into Apache Ignite's **distributed database** (SQL Query Entity).
     - Update global stats.
