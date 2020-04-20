@@ -7,7 +7,7 @@ This is our Quiz REST Api implementation using Mule's APIKit router and [RAML 1.
 ## Model and distributed database
  
 Quiz entity (_convenient annotated for SQL_). Take a look to `org.hawkore.samples.api.quiz.entities.Quiz` for more details:
-- `id`: Response identifier.
+- `id`: Unique identifier (`quizCache` key).
 - `email`: Surveyed's email.
 - `yes`: a YES response.
 - `no`: a NO response.
@@ -44,11 +44,11 @@ Our REST Api implements below operations:
 
 ### Send a new Quiz (POST /api/quiz)
 
-Every received Quiz Response (POST request) by our Quiz API will be enqueued into an Apache Ignite Queue to perform **distributed data processing** by Workers ([mule-worker-app](../mule-worker-app/README.md)).
+Every received Quiz (POST request) by our REST API will be enqueued into an Apache Ignite Queue to perform **distributed data processing** by Workers (see [mule-worker-app](../mule-worker-app/README.md)).
 
 ![kube-mule-ignite-api](../docs/assets/kube-mule-ignite-api.gif)
 
-Mule flow to acquire Quizzes from request to HTTP POST (/api/quiz) and publish them to a distributed Queue:
+Mule flow to acquire Quizzes from HTTP POST request (/api/quiz) and publish them to a distributed Queue:
 
 ![mule-api-app-post-flow](../docs/assets/mule-api-app-post-flow.png)
 
@@ -62,7 +62,7 @@ As simple as query distributed database (`quizCache`) using SQL:
 
 ### Clear all quizzes and stats
 
-It will delete all data stored in distributed database (`quizCache`) and reset all **distributed atomic Longs** to `0` (global stats).
+It will delete all data stored in distributed quiz's cache (`quizCache`) and reset all **distributed atomic Longs** to `0` (global stats).
 
 ### Retrieve global stats
 
@@ -108,7 +108,7 @@ Configure IP finder on [ignite-config.xml](src/main/resources/ignite-config.xml)
 
 ## Kubernetes artifacts
 
-- Namespace `my-mule4-stack` and service `ignite-cluster-one-service` for discovery, spring management and load balancing are defined in [k8s configuration yaml for mandatory artifacts](../kubernetes/1-mandatory.yaml)
+- Namespace `my-mule4-stack`, service `ignite-cluster-one-service` and service `mule-api-app-service` for discovery, spring management and load balancing are defined in [k8s configuration yaml for mandatory artifacts](../kubernetes/1-mandatory.yaml)
 - Will be started as a micro-service using [Spring Boot Mule 4 Runtime CE docker image](../spring-boot-mule4-runtime-ce/README.md), see  [statefulSet configuration yaml for REST Api](../kubernetes/6-statefulset-mule-api-app.yaml)
 
 ## Build Mule application

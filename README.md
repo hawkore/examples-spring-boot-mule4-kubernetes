@@ -33,11 +33,11 @@ gain **high avaliability** deploying **Mule Applications** as clustered micro-se
 using the [Apache Ignite Connector for Mule 4](https://www.hawkore.com/plugins/product/pl-g-big-data/pl-t-ignite/pl-p-ignitev4). 
 
 #### Architecture
-Our system to collect quizzes will be composed by: 
-- A **REST Api**, a Mule application deployed as a clustered micro-service (_**data acquisition phase**_ and other operations like **queries over distributed database**).
-- A **Worker**, a Mule application deployed as a clustered micro-service for **distributed data processing** (_**data processing phase**_).
-- An **Apache Ignite cluster** with persistence enabled for **distributed data storage** and **distributed computation**.
-- An **Spring Boot Admin Server cluster** to monitor our Spring Boot applications.
+Our system to collect quizzes is be composed by: 
+- A **[REST Api](mule-api-app/README.md)**, is a Mule application deployed as a clustered micro-service (_**data acquisition phase**_ and other operations like **queries over distributed database**).
+- A **[Worker](mule-worker-app/README.md)**, is a Mule application deployed as a clustered micro-service for **distributed data processing** (_**data processing phase**_).
+- An **[Apache Ignite Server](spring-boot-apache-ignite-server/README.md)** cluster with persistence enabled for **distributed data storage** and **distributed computation**.
+- An **[Spring Boot Admin Server](spring-boot-admin-server/README.md)** cluster to monitor our Spring Boot applications.
 
 ![architecture](docs/assets/kube-mule-ignite.png)
 
