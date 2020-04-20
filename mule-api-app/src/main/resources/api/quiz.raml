@@ -6,7 +6,7 @@ mediaType: application/json
 
 /quiz:
   post:
-    description: Store quiz
+    description: Send a new quiz
     body:
       application/json:
         type: nil
@@ -61,7 +61,7 @@ mediaType: application/json
              example: |
               {"message": "error message" }
   get:
-    description: List quizs
+    description: List quizzes
     queryParameters:
           page?:
             description: page number
@@ -112,7 +112,7 @@ mediaType: application/json
              example: |
               {"message": "error message" }
   delete:
-    description: Clear all quizs and stats
+    description: Clear all quizzes and stats
     responses:
       200:
         body:
@@ -156,7 +156,7 @@ mediaType: application/json
               {"message": "error message" }
   /stats:
     get:
-      description: Global stats
+      description: Retrieve global stats
       responses:
         200:
           body:

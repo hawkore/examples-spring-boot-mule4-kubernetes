@@ -26,6 +26,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Manuel Núñez Sánchez (manuel.nunez@hawkore.com)
  */
 @SpringBootApplication
+// this annotation will expose LOCAL HK License management endpoints to install licenses for HK Products
 @EnableHKLicenseManagement
 public class SpringBootIgniteServer {
 

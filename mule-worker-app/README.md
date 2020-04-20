@@ -1,10 +1,24 @@
-## Spring Boot Apache Ignite Server Node
+# Worker Mule Application
 
-A simple implementation to run Apache Ignite into a Spring Boot application, see `org.hawkore.springframework.boot.ignite.config.IgniteConfig` for more details.
+Workers will listen on a distributed Queue for new Quiz to process:
+- Avoiding more than one Quiz per surveyed (**distributed LOCK scope**).
+- Updating Quiz with additional data.
+- Storing Quiz into Apache Ignite's **distributed database** (SQL Query Entity).
+- Updating global stats.
+
+![kube-mule-ignite-worker](../docs/assets/kube-mule-ignite-worker.gif)
+
+Mule flow to listen on distributed Queue for new Quiz to process, ensuring uniqueness:
+
+![mule-worker-app-ingest-flow](../docs/assets/mule-worker-app-ingest-flow.png)
+
+Mule flow to process Quizzes:
+
+![mule-worker-app-process-flow](../docs/assets/mule-worker-app-process-flow.png)
 
 ## Ignite Configuration for kubernetes
 
-Set as `server node` (`clientMode=false`), enable persistence and configure IP finder on [ignite-config.xml](src/main/resources/ignite-config.xml) as `org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder` with the **kubernetes service name** to find server nodes and the **namespace**.
+Configure IP finder on [ignite-config.xml](src/main/resources/ignite-config.xml) as `org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder` with the **kubernetes service name** to find server nodes and the **namespace**.
 
 ``` xml
  <bean id="ignite-config" class="org.apache.ignite.configuration.IgniteConfiguration">
@@ -31,12 +45,13 @@ Set as `server node` (`clientMode=false`), enable persistence and configure IP f
 ```
 
 - Namespace `my-mule4-stack` and service `ignite-cluster-one-service` for discovery, spring management and load balancing are defined in [k8s configuration yaml for mandatory artifacts](../kubernetes/1-mandatory.yaml)
-- See [StatefulSet configuration yaml for Spring Boot Apache Ignite Server](../kubernetes/4-statefulset-ignite-server-node.yaml)
+- See [StatefulSet configuration yaml for Worker](../kubernetes/7-statefulset-mule-worker-app.yaml)
 
-# Build
+# Build Mule application
 
-Build docker image (`docker.hawkore.com/k8s/spring-boot-apache-ignite-server:latest`):
+Build application:
 
 ``` bash
-mvn clean install -Pdocker
+mvn clean package
 ```
+

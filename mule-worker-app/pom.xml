@@ -19,11 +19,11 @@ limitations under the License.
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.hawkore.samples</groupId>
-  <artifactId>test-mule-worker</artifactId>
+  <artifactId>mule-worker-app</artifactId>
   <version>1.0.0</version>
   <packaging>mule-application</packaging>
 
-  <name>test-mule-worker</name>
+  <name>mule-worker-app</name>
 
   <licenses>
     <license>
@@ -158,6 +158,7 @@ limitations under the License.
 
   <dependencies>
 
+    <!-- Apache Ignite connector for Mule 4 -->
     <dependency>
       <groupId>com.hawkore.mule.extensions</groupId>
       <artifactId>apache-ignite-extension</artifactId>
@@ -211,18 +212,6 @@ limitations under the License.
       <version>${apache.ignite.connector.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.mule.connectors</groupId>
-      <artifactId>mule-http-connector</artifactId>
-      <version>1.5.11</version>
-      <classifier>mule-plugin</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.mule.connectors</groupId>
-      <artifactId>mule-sockets-connector</artifactId>
-      <version>1.1.5</version>
-      <classifier>mule-plugin</classifier>
-    </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-core</artifactId>

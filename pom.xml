@@ -55,8 +55,8 @@ limitations under the License.
     <module>spring-boot-admin-server</module>
     <module>spring-boot-apache-ignite-server</module>
     <module>spring-boot-mule4-runtime-ce</module>
-    <module>test-mule-api</module>
-    <module>test-mule-worker</module>
+    <module>mule-api-app</module>
+    <module>mule-worker-app</module>
   </modules>
 
 </project>

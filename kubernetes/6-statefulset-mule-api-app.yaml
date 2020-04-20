@@ -34,14 +34,14 @@ spec:
               value: '-server -Xms128M -Xmx256M
               -DIGNITE_QUIET=false
               -Dspring.application.name=mule-api-app
-              -Dmule.apps=file:/opt/mule/shared/test-mule-api-1.0.0-mule-application.jar -Dmule.cleanStartup=true'
+              -Dmule.apps=file:/opt/mule/shared/mule-api-app-1.0.0-mule-application.jar -Dmule.cleanStartup=true'
           workingDir: /opt/mule/
           ports:
             - containerPort: 8081 # default mule HTTP connector port number.
             - containerPort: 8888 # Spring Boot management port (actuator)
           resources:
             limits:
-              memory: "1Gi"
+              memory: "800Mi"
           volumeMounts:
             # mount shared volume to load Mule application
             - mountPath: /opt/mule/shared

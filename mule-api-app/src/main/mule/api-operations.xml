@@ -51,7 +51,7 @@ payload map ( payload01 , indexOfPayload01 ) -&gt; {
 }]' doc:name="List to JSON array" doc:id="10ba7887-ef86-4f13-a548-542b8bcb980b" />
     </flow>
     <flow name="delete:\quiz:quiz-api-config">
-		<apache-ignite:cache-clear doc:name="Clear QUIZS" doc:id="191f9eb6-0a07-4b60-99df-03b42a277a7f" config-ref="Apache_Ignite_Config" cache="QUIZS"/>
+		<apache-ignite:cache-clear doc:name="Clear QUIZS" doc:id="191f9eb6-0a07-4b60-99df-03b42a277a7f" config-ref="Apache_Ignite_Config" cache="quizCache"/>
 		<apache-ignite:atomic-long-get-and-set doc:id="e8efb2ba-6598-46c1-8cb6-1f29b7a588c8" config-ref="Apache_Ignite_Config" atomic="TOTAL_REC_QUIZS" doc:name="Reset TOTAL RECEIVED QUIZS" valueToSet="#[0]"/>
 		<apache-ignite:atomic-long-get-and-set doc:id="abaaecf6-268f-4d1f-a510-d0afe8bb6e04" config-ref="Apache_Ignite_Config" atomic="TOTAL_PROC_QUIZS" doc:name="Reset TOTAL PROCESSED QUIZS" valueToSet="#[0]" target="totalProcessed"/>
 		<apache-ignite:atomic-long-get-and-set doc:id="a2ec4971-1835-447a-83bc-56f55c6a43a2" config-ref="Apache_Ignite_Config" atomic="TOTAL_DUPLICATED_QUIZS" doc:name="Get TOTAL DUPLICATED QUIZS" valueToSet="#[0]" target="totalDuplicated"/>

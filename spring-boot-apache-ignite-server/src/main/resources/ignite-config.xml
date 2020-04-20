@@ -75,12 +75,12 @@
         <property name="localPortRange" value="1" />
         <property name="ipFinder">
           <!--
-          Enables Kubernetes IP finder and set custom namespace name and service name (cluster).
+          Enables Kubernetes IP finder and set namespace and service name (cluster) to find SERVER nodes.
           -->
           <bean class="org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder">
             <property name="shared" value="true" />
-            <property name="namespace" value="my-mule4-stack"/>
-            <property name="serviceName" value="ignite-cluster-one-service"/>
+            <property name="namespace" value="my-mule4-stack" />
+            <property name="serviceName" value="ignite-cluster-one-service" />
           </bean>
         </property>
       </bean>
