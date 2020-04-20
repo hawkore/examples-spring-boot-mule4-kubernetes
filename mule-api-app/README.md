@@ -21,7 +21,7 @@ Quizzes will be stored into an Apache Ignite distributed Cache (`quizCache`), so
 just [configure cache](src/main/resources/ignite-config.xml) to take care of this entity as an `SQL Query Entity`, 
 just add tuple (`java.lang.Long`, `org.hawkore.samples.api.quiz.entities.Quiz`) into `indexedTypes` property - _array of tuples (key type , value type)_ -:
 
-```
+```xml
 <bean name="quiz-cache" id="quiz-cache" class="org.apache.ignite.configuration.CacheConfiguration">
     <property name="name" value="quizCache" />
     <property name="cacheMode" value="PARTITIONED" />
@@ -67,7 +67,7 @@ It will delete all data stored in distributed database (`quizCache`) and reset a
 ### Retrieve global stats
 
 Retrieve global stats (**distributed atomic Longs**) as JSON:
-```
+```json
 {
 	"totalYes": 0,
 	"totalNo": 0,
@@ -82,7 +82,7 @@ Retrieve global stats (**distributed atomic Longs**) as JSON:
 
 Configure IP finder on [ignite-config.xml](src/main/resources/ignite-config.xml) as `org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder` with the **kubernetes service name** to find server nodes and the **namespace**.
 
-``` xml
+```xml
  <bean id="ignite-config" class="org.apache.ignite.configuration.IgniteConfiguration">
     ...
 
@@ -106,13 +106,15 @@ Configure IP finder on [ignite-config.xml](src/main/resources/ignite-config.xml)
 </bean>
 ```
 
-- Namespace `my-mule4-stack` and service `ignite-cluster-one-service` for discovery, spring management and load balancing are defined in [k8s configuration yaml for mandatory artifacts](../kubernetes/1-mandatory.yaml)
-- See [statefulSet configuration yaml for REST Api](../kubernetes/6-statefulset-mule-api-app.yaml)
+## Kubernetes artifacts
 
-# Build Mule application
+- Namespace `my-mule4-stack` and service `ignite-cluster-one-service` for discovery, spring management and load balancing are defined in [k8s configuration yaml for mandatory artifacts](../kubernetes/1-mandatory.yaml)
+- Will be started as a micro-service using [Spring Boot Mule 4 Runtime CE docker image](../spring-boot-mule4-runtime-ce/README.md), see  [statefulSet configuration yaml for REST Api](../kubernetes/6-statefulset-mule-api-app.yaml)
+
+## Build Mule application
 
 Build application:
 
-``` bash
+```bash
 mvn clean package
 ```

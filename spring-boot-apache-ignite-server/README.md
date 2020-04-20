@@ -4,9 +4,9 @@ A simple implementation to run Apache Ignite into a Spring Boot application, see
 
 ## Ignite Configuration for kubernetes
 
-Set as `server node` (`clientMode=false`), enable persistence and configure IP finder on [ignite-config.xml](src/main/resources/ignite-config.xml) as `org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder` with the **kubernetes service name** to find server nodes and the **namespace**.
+Set Apache Ignite node as `server node` (`clientMode=false`), enable persistence and configure IP finder on [ignite-config.xml](src/main/resources/ignite-config.xml) as `org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder` with the **kubernetes service name** to find server nodes and the **namespace**.
 
-``` xml
+```xml
  <bean id="ignite-config" class="org.apache.ignite.configuration.IgniteConfiguration">
     ...
 
@@ -30,13 +30,15 @@ Set as `server node` (`clientMode=false`), enable persistence and configure IP f
 </bean>
 ```
 
+## Kubernetes artifacts
+
 - Namespace `my-mule4-stack` and service `ignite-cluster-one-service` for discovery, spring management and load balancing are defined in [k8s configuration yaml for mandatory artifacts](../kubernetes/1-mandatory.yaml)
 - See [StatefulSet configuration yaml for Spring Boot Apache Ignite Server](../kubernetes/4-statefulset-ignite-server-node.yaml)
 
-# Build
+## Build
 
 Build docker image (`docker.hawkore.com/k8s/spring-boot-apache-ignite-server:latest`):
 
-``` bash
+```bash
 mvn clean install -Pdocker
 ```

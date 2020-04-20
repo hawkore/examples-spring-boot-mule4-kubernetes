@@ -20,7 +20,7 @@ Mule flow to process Quizzes:
 
 Configure IP finder on [ignite-config.xml](src/main/resources/ignite-config.xml) as `org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder` with the **kubernetes service name** to find server nodes and the **namespace**.
 
-``` xml
+```xml
  <bean id="ignite-config" class="org.apache.ignite.configuration.IgniteConfiguration">
     ...
 
@@ -44,14 +44,16 @@ Configure IP finder on [ignite-config.xml](src/main/resources/ignite-config.xml)
 </bean>
 ```
 
+## Kubernetes artifacts
+
 - Namespace `my-mule4-stack` and service `ignite-cluster-one-service` for discovery, spring management and load balancing are defined in [k8s configuration yaml for mandatory artifacts](../kubernetes/1-mandatory.yaml)
-- See [StatefulSet configuration yaml for Worker](../kubernetes/7-statefulset-mule-worker-app.yaml)
+- Will be started as a micro-service using [Spring Boot Mule 4 Runtime CE docker image](../spring-boot-mule4-runtime-ce/README.md), see [StatefulSet configuration yaml for Worker](../kubernetes/7-statefulset-mule-worker-app.yaml)
 
 # Build Mule application
 
 Build application:
 
-``` bash
+```bash
 mvn clean package
 ```
 

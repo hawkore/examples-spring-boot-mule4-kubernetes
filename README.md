@@ -4,17 +4,13 @@ In this example, we are going to create a system to collect quizzes,
 deploying it as a set of micro-services on kubernetes to ensure **high availability**, supporting **distributed computation** using Apache Ignite
 and **managing** the entire spring-boot system with Spring Boot Admin Server.
 
-[Learn more about Mule ESB.](https://blog.hawkore.com/2020/04/02/mule-intro/)
-
-[Learn more about Apache Ignite.](https://blog.hawkore.com/2020/03/27/apache-ignite-intro/)
-
-[Learn more about Spring Boot Admin Server.](https://github.com/codecentric/spring-boot-admin#codecentrics-spring-boot-admin)
-
 ## Table of Contents
 
   * [Getting Started](#getting-started)
     + [Overview](#overview)
         + [Architecture](#architecture)
+        + [Data acquisition phase](#data-acquisition-phase)
+        + [Data processing phase](#data-processing-phase)
     + [Prerequisites](#prerequisites)
         + [Preparing environment](#preparing-environment)
         + [Required system resources](#required-system-resources)
@@ -25,26 +21,27 @@ and **managing** the entire spring-boot system with Spring Boot Admin Server.
   * [Appendix](#appendix)
     + [Testing your own modifications](#testing-your-own-modifications)
     + [Full clean-up this sample from your computer](#clean-up)
+    + [Learn more](#learn-more)
   * [License](#license)
 
 ## Getting Started
 
 ### Overview
-The goal of this example is show how to **join Mule's productivity** with the **Spring Boot ecosystem** 
-using the [Spring boot starter for Mule 4](https://github.com/hawkore/mule4-spring-boot-starter), 
-gain **high avaliability** deploying **Mule Applications** as micro-services on kubernetes and perform **distributed data processing** 
+The goal of this example is show how to join **Mule's productivity** with the **Spring Boot ecosystem** 
+using the [Spring Boot Starter for Mule 4](https://github.com/hawkore/mule4-spring-boot-starter), 
+gain **high avaliability** deploying **Mule Applications** as clustered micro-services on kubernetes and perform **distributed data processing** 
 using the [Apache Ignite Connector for Mule 4](https://www.hawkore.com/plugins/product/pl-g-big-data/pl-t-ignite/pl-p-ignitev4). 
 
 #### Architecture
 Our system to collect quizzes will be composed by: 
-- A **REST Api**, a Mule application deployed as a clustered micro-service (_**data acquisition phase**_).
+- A **REST Api**, a Mule application deployed as a clustered micro-service (_**data acquisition phase**_ and other operations like **queries over distributed database**).
 - A **Worker**, a Mule application deployed as a clustered micro-service for **distributed data processing** (_**data processing phase**_).
 - An **Apache Ignite cluster** with persistence enabled for **distributed data storage** and **distributed computation**.
 - An **Spring Boot Admin Server cluster** to monitor our Spring Boot applications.
 
 ![architecture](docs/assets/kube-mule-ignite.png)
 
-#### Data acquisition phase: REST Api
+#### Data acquisition phase
 
 1. User's requests are balanced by internal kubernetes load balancer between our REST Api nodes to ensure high avaliability.
 
@@ -52,7 +49,7 @@ Our system to collect quizzes will be composed by:
 
 ![kube-mule-ignite-api](docs/assets/kube-mule-ignite-api.gif)
 
-#### Data processing phase: Worker
+#### Data processing phase
 
 Workers will listen on a distributed Queue for new Quiz to process:
 - Avoiding more than one Quiz per surveyed (**distributed LOCK scope**).
@@ -94,7 +91,7 @@ Before start deploying, you need to follow below steps:
             
     Run `kubectl describe nodes` to ensure you have enough available resources:
     
-    ``` bash
+    ```bash
     ...
     Allocated resources:
       (Total limits may be over 100 percent, i.e., overcommitted.)
@@ -121,7 +118,7 @@ Before start deploying, you need to follow below steps:
 Let's start building required artifacts.
 
 1. Clone this project:
-    ``` bash
+    ```bash
     git clone https://github.com/hawkore/examples-spring-boot-mule4-kubernetes.git
     cd examples-spring-boot-mule4-kubernetes
     ```
@@ -129,7 +126,7 @@ Let's start building required artifacts.
 2. Ensure Docker and Kubernetes are started and ready.
 
 3. Build required artifacts at once (Mule Applications and docker images):
-    ``` bash
+    ```bash
     mvn clean install -Pdocker
     ```
 4. Copy packaged Mule applications into `shared` folder:
@@ -140,7 +137,7 @@ Let's start building required artifacts.
 Let's go with deployment on kubernetes. Please, follow below steps in order _within `examples-spring-boot-mule4-kubernetes` directory_:
 
 1. Create [mandatory kubernetes artifacts](kubernetes/1-mandatory.yaml)
-    ``` bash
+    ```bash
     kubectl apply -f kubernetes/1-mandatory.yaml
     ```
 
@@ -149,36 +146,36 @@ Let's go with deployment on kubernetes. Please, follow below steps in order _wit
     
         **NOTE:** _Requires that `/opt/k8s/ignite-work` and `/opt/k8s/shared` directories exist_
         
-        ``` bash
+        ```bash
         kubectl apply -f kubernetes/2-local-disk-volumes-linux-mac.yaml
         ```
     - For **Windows**: Apply this [k8s yaml file for persistent volumes on Windows](kubernetes/2-local-disk-volumes-windows.yaml):
     
         **NOTE:** _Requires that `c:\opt\k8s\ignite-work` and `c:\opt\k8s\shared` directories exist_
         
-        ``` bash
+        ```bash
         kubectl apply -f kubernetes/2-local-disk-volumes-windows.yaml
         ```
 
 3. Deploy [Spring Boot Admin Server](spring-boot-admin-server/README.md) on kubernetes (2 replicas):
-    ``` bash
+    ```bash
     kubectl apply -f kubernetes/3-statefulset-sb-admin-server.yaml
     ```
 
 4. Deploy [Spring Boot Ignite Server](spring-boot-apache-ignite-server/README.md) on kubernetes (1 replica):
-    ``` bash
+    ```bash
     kubectl apply -f kubernetes/4-statefulset-ignite-server-node.yaml
     ```
 
 5. Once Spring Boot Ignite Server is running, [install and activate a license for Apache Ignite Connector for Mule 4](kubernetes/5-INSTALL_AND_ACTIVATE_LICENSE.md)
 
 6. Deploy [Quiz REST Api - Mule Application](mule-api-app/README.md) on kubernetes (1 replica):
-    ``` bash
+    ```bash
     kubectl apply -f kubernetes/6-statefulset-mule-api-app.yaml
     ```
 
 7. Deploy [Worker - Mule Application](mule-worker-app/README.md) on kubernetes (2 replicas):
-    ``` bash
+    ```bash
     kubectl apply -f kubernetes/7-statefulset-mule-worker-app.yaml
     ```
 
@@ -203,7 +200,7 @@ Open your browser and play with [Quiz REST Api console](http://mule-api.local/co
 #### Playing with kubernetes scaling
 
 1. Scale `mule-worker-app` to `1` replica and see what happens on [Spring Boot Admin Server Wallboard](http://sbadmin.local/wallboard):
-    ``` bash
+    ```bash
     kubectl scale -n my-mule4-stack statefulset mule-worker-app --replicas=1
     ```
 
@@ -211,7 +208,7 @@ Open your browser and play with [Quiz REST Api console](http://mule-api.local/co
 
     _`totalReceived` should be increassed on every new received Quiz Response (POST request); `totalProcessed` and `totalDuplicated` should remain un-altered_
     
-    ``` bash
+    ```bash
     kubectl scale -n my-mule4-stack statefulset mule-worker-app --replicas=0
     ```
 
@@ -221,7 +218,7 @@ Open your browser and play with [Quiz REST Api console](http://mule-api.local/co
 
     _Once Workers finish processing enqueued Quiz Responses, `totalProcessed` + `totalDuplicated` should be equals to `totalReceived`_
     
-    ``` bash
+    ```bash
     kubectl scale -n my-mule4-stack statefulset mule-worker-app --replicas=2
     ```
     ![stats-with-workers](docs/assets/mule-api-stats-with-workers.png)
@@ -249,14 +246,14 @@ Open your browser and play with [Quiz REST Api console](http://mule-api.local/co
 If you want to modify `mule-api-app` or `mule-worker-app` and redeploy them, follow below steps:
 
 1. Package it again and copy jar file into `/opt/k8s/shared` directory, for example:
-    ``` bash
+    ```bash
     cd mule-api-app
     mvn clean package
     cp target/mule-api-app-1.0.0-mule-application.jar /opt/k8s/shared/
     ```
 
 2. Restart the kubernetes statefulset of your modified Mule application, for example:
-    ``` bash
+    ```bash
     kubectl rollout restart -n my-mule4-stack statefulset/mule-api-app
     ```
 
@@ -265,15 +262,21 @@ If you want to modify `mule-api-app` or `mule-worker-app` and redeploy them, fol
 To full clean-up this sample from your computer, follow below steps:
 
 1. Remove namespace from kubernetes:
-    ``` bash
+    ```bash
     kubectl delete namespace my-mule4-stack
     ```
 2. Remove persistent volumes:
-    ``` bash
+    ```bash
     kubectl delete persistentvolume ignite-storage
     kubectl delete persistentvolume shared-storage
     ```
 3. Optionally, delete `/opt/k8s` directory. **WARNING**: If you delete `/opt/k8s` directory you will lose license activation for Apache Ignite Connector!!
+
+### Learn more
+- About [Mule ESB](https://blog.hawkore.com/2020/04/02/mule-intro/).
+- About [Apache Ignite](https://blog.hawkore.com/2020/03/27/apache-ignite-intro/).
+- About [Spring Boot Starter for Mule 4](https://github.com/hawkore/mule4-spring-boot-starter).
+- About [Spring Boot Admin Server](https://github.com/codecentric/spring-boot-admin#codecentrics-spring-boot-admin).
 
 ## License
 Copyright 2020 HAWKORE, S.L.

@@ -23,10 +23,10 @@ In this example, it will allow us to easy run our Mule Applications as micro-ser
 
 See [statefulSet configuration yaml for REST Api](../kubernetes/6-statefulset-mule-api-app.yaml) or [statefulSet configuration yaml for Worker](../kubernetes/7-statefulset-mule-worker-app.yaml).
 
-# Build
+## Build
 
 Build docker image (`docker.hawkore.com/k8s/spring-boot-mule4-runtime-ce:latest`):
 
-``` bash
+```bash
 mvn clean install -Pdocker
 ```

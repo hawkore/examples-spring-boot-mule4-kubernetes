@@ -50,7 +50,7 @@ to your main Spring Boot Admin Server application class:
 
     **IMPORTANT**: In our case, the name of this ConfigMap must be equals to `sb-admin-server`, as defined in [application.properties](src/main/resources/application.properties) `spring.application.name` property.
 
-    ```
+    ```yaml
     # Config Map for Spring Boot Admin Server to auto-discover spring boot applications to manage
     apiVersion: v1
     kind: ConfigMap
@@ -70,7 +70,7 @@ to your main Spring Boot Admin Server application class:
 
 4. Kubernetes services grouping Spring Boot applications to manage must include label `spring-boot-managed: "true"`, for example:
 
-    ```
+    ```yaml
     # Service (Load balancer) for Quiz REST Api: api endpoints, RAML console and spring boot management (actuator)
     apiVersion: v1
     kind: Service
@@ -97,7 +97,7 @@ to your main Spring Boot Admin Server application class:
 Clustering Spring Boot Admin Server instances requires to provide a mechanism to share information about spring boot application instances across Spring Boot Admin Server nodes,
 so, as we want to work with Apache Ignite we have implemented an `EventeStore` backed by a distributed Apache Ignite cache, see `org.hawkore.springframework.boot.admin.cluster.IgniteEventStore` implementation for more details:
 
-```
+```java
 /**
  * Creates an event store for spring boot admin server in cluster
  *
@@ -123,7 +123,7 @@ public IgniteEventStore eventStore(@Autowired Ignite ignite,
 
 Configure IP finder on [ignite-config.xml](src/main/resources/ignite-config.xml) as `org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder` with the **kubernetes service name** to find other Spring Boot Admin server nodes and the **namespace**.
 
-``` xml
+```xml
  <bean id="ignite-config" class="org.apache.ignite.configuration.IgniteConfiguration">
     ...
 
@@ -147,6 +147,8 @@ Configure IP finder on [ignite-config.xml](src/main/resources/ignite-config.xml)
 </bean>
 ```
 
+## Kubernetes artifacts
+
 - Namespace `my-mule4-stack`, service `sb-admin-server-service` and ConfigMap `sb-admin-server` for discovery, spring management and load balancing are defined in [k8s configuration yaml for mandatory artifacts](../kubernetes/1-mandatory.yaml)
 - [StatefulSet for Spring Boot Admin Server configuration yaml](../kubernetes/3-statefulset-sb-admin-server.yaml)
 
@@ -155,6 +157,6 @@ Configure IP finder on [ignite-config.xml](src/main/resources/ignite-config.xml)
 
 Build docker image (`docker.hawkore.com/k8s/spring-boot-admin-server:latest`):
 
-``` bash
+```bash
 mvn clean install -Pdocker
 ```
