@@ -228,8 +228,8 @@ Open your browser and play with [Quiz REST Api console](http://mule-api.local/co
     
     ![list-quizs](docs/assets/mule-api-list-quizs.png)
      
-    - Quiz response information:
-        - `id`: Response identifier.
+    - Quiz's data:
+        - `id`:  Unique identifier (`quizCache` key).
         - `email`: Surveyed's email.
         - `yes`: a YES response.
         - `no`: a NO response.
