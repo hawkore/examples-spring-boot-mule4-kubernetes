@@ -206,7 +206,7 @@ Open your browser and play with [Quiz REST Api console](http://mule-api.local/co
 
 2. Stop all Workers (scale to `0`) and see what happens when create new Quizzes (POST request) and GET stats from [Quiz REST Api console](http://mule-api.local/console)
 
-    _`totalReceived` should be increassed on every new received Quiz Response (POST request); `totalProcessed` and `totalDuplicated` should remain un-altered_
+    _`totalReceived` should be increassed on every new received Quiz (POST request); `totalProcessed` and `totalDuplicated` should remain un-altered_
     
     ```bash
     kubectl scale -n my-mule4-stack statefulset mule-worker-app --replicas=0
