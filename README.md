@@ -204,7 +204,7 @@ Open your browser and play with [Quiz REST Api console](http://mule-api.local/co
     kubectl scale -n my-mule4-stack statefulset mule-worker-app --replicas=1
     ```
 
-2. Stop all Workers (scale to `0`) and see what happens when create new Quiz Responses (POST request) and GET stats from [Quiz REST Api console](http://mule-api.local/console)
+2. Stop all Workers (scale to `0`) and see what happens when create new Quizzes (POST request) and GET stats from [Quiz REST Api console](http://mule-api.local/console)
 
     _`totalReceived` should be increassed on every new received Quiz Response (POST request); `totalProcessed` and `totalDuplicated` should remain un-altered_
     
@@ -216,7 +216,7 @@ Open your browser and play with [Quiz REST Api console](http://mule-api.local/co
 
 3. Scale `mule-worker-app` to `2` replicas and see what happens when GET stats from [Quiz REST Api console](http://mule-api.local/console)
 
-    _Once Workers finish processing enqueued Quiz Responses, `totalProcessed` + `totalDuplicated` should be equals to `totalReceived`_
+    _Once Workers finish processing enqueued Quizzes, `totalProcessed` + `totalDuplicated` should be equals to `totalReceived`_
     
     ```bash
     kubectl scale -n my-mule4-stack statefulset mule-worker-app --replicas=2
@@ -224,7 +224,7 @@ Open your browser and play with [Quiz REST Api console](http://mule-api.local/co
     ![stats-with-workers](docs/assets/mule-api-stats-with-workers.png)
 
 
-4. List Quiz Responses to see data enrichment and how Quiz processing was distributed between nodes:
+4. List Quizzes to see how data processing was distributed between nodes:
     
     ![list-quizs](docs/assets/mule-api-list-quizs.png)
      
