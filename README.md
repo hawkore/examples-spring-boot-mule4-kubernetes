@@ -34,8 +34,8 @@ using the [Apache Ignite Connector for Mule 4](https://www.hawkore.com/plugins/p
 
 #### Architecture
 Our system to collect quizzes is composed by: 
-- A **[REST Api](mule-api-app/README.md)**: It's a Mule application deployed as a clustered micro-service (_**data acquisition phase**_ and other operations like **queries over distributed database**).
-- A **[Worker](mule-worker-app/README.md)**: It's a Mule application deployed as a clustered micro-service for **distributed data processing** (_**data processing phase**_).
+- A **[REST Api](mule-api-app/README.md)**: It's a Mule application deployed as a clustered micro-service (_**[data acquisition phase](#data-acquisition-phase)**_ and other operations like **queries over distributed database**).
+- A **[Worker](mule-worker-app/README.md)**: It's a Mule application deployed as a clustered micro-service for **distributed data processing** (_**[data processing phase](#data-processing-phase)**_).
 - An **[Apache Ignite Server](spring-boot-apache-ignite-server/README.md)** cluster with persistence enabled for **distributed data storage** and **distributed computation**.
 - An **[Spring Boot Admin Server](spring-boot-admin-server/README.md)** cluster to monitor our Spring Boot applications.
 
