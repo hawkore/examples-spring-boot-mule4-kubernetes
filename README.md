@@ -1,7 +1,7 @@
 # Distributed computation with Mule 4 and kubernetes
 
 In this example, we are going to create a system to collect quizzes,
-deploying it as a set of micro-services on kubernetes to ensure **high availability**, supporting **distributed computation** using Apache Ignite
+deploying it as a set of clustered micro-services on kubernetes to ensure **high availability**, supporting **distributed computation** using Apache Ignite
 and **managing** the entire spring-boot system with Spring Boot Admin Server.
 
 ## Table of Contents
@@ -34,8 +34,8 @@ using the [Apache Ignite Connector for Mule 4](https://www.hawkore.com/plugins/p
 
 #### Architecture
 Our system to collect quizzes is composed by: 
-- A **[REST Api](mule-api-app/README.md)**, is a Mule application deployed as a clustered micro-service (_**data acquisition phase**_ and other operations like **queries over distributed database**).
-- A **[Worker](mule-worker-app/README.md)**, is a Mule application deployed as a clustered micro-service for **distributed data processing** (_**data processing phase**_).
+- A **[REST Api](mule-api-app/README.md)**: It's a Mule application deployed as a clustered micro-service (_**data acquisition phase**_ and other operations like **queries over distributed database**).
+- A **[Worker](mule-worker-app/README.md)**: It's a Mule application deployed as a clustered micro-service for **distributed data processing** (_**data processing phase**_).
 - An **[Apache Ignite Server](spring-boot-apache-ignite-server/README.md)** cluster with persistence enabled for **distributed data storage** and **distributed computation**.
 - An **[Spring Boot Admin Server](spring-boot-admin-server/README.md)** cluster to monitor our Spring Boot applications.
 
@@ -243,9 +243,9 @@ Open your browser and play with [Quiz REST Api console](http://mule-api.local/co
 
 ### Testing your own modifications
 
-If you want to modify `mule-api-app` or `mule-worker-app` and redeploy them, follow below steps:
+If you want to modify `mule-api-app` or `mule-worker-app` and re-deploy them, follow below steps:
 
-1. Package it again and copy jar file into `/opt/k8s/shared` directory, for example:
+1. Package again and copy generated jar file into `/opt/k8s/shared` directory, for example:
     ```bash
     cd mule-api-app
     mvn clean package
