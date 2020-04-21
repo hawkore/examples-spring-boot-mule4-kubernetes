@@ -21,7 +21,7 @@ import java.util.StringJoiner;
 import org.apache.ignite.cache.query.annotations.QuerySqlField;
 
 /**
- * Quiz, convenient annotated fields for SQL queries (distributed database)
+ * Quiz, conveniently annotated fields for SQL queries (distributed database)
  *
  * @author Manuel Núñez Sánchez (manuel.nunez@hawkore.com)
  */

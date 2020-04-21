@@ -6,7 +6,7 @@ This is our Quiz REST Api implementation using Mule's APIKit router and [RAML 1.
 
 ## Model and distributed database
  
-Quiz entity (_convenient annotated for SQL_). Take a look to `org.hawkore.samples.api.quiz.entities.Quiz` for more details:
+Quiz entity (_conveniently annotated for SQL_). Take a look to `org.hawkore.samples.api.quiz.entities.Quiz` for more details:
 - `id`: Unique identifier (`quizCache` key).
 - `email`: Surveyed's email.
 - `yes`: a YES response.
