@@ -1,7 +1,7 @@
 # Install license for Apache Ignite Connector
-We are going to deploy Mule applications that use [Apache Ignite Connector for Mule 4](https://www.hawkore.com/plugins/product/pl-g-big-data/pl-t-ignite/pl-p-ignitev4) in a kubernetes cluster, so at this point you need to install a valid license prior to deploy sample Mule applications, if you haven't installed it yet.
+We are going to deploy Mule applications that use the [Apache Ignite Connector for Mule 4](https://www.hawkore.com/plugins/product/pl-g-big-data/pl-t-ignite/pl-p-ignitev4) in a Kubernetes cluster, so at this point you need to install a valid license prior to deploy them, if you haven't installed it yet.
 
-Contact [Hawkore](https://www.hawkore.com/contact) to request a TRIAL license for Apache Ignite Connector for Mule4.
+Contact [Hawkore](https://www.hawkore.com/contact) to request for a TRIAL license for the Apache Ignite Connector for Mule4.
 
 Ensure Spring Boot Apache Ignite Server is running, then open HK license manager in your browser [http://ignite-rest.local/hk-license/hk-license-ui.html](http://ignite-rest.local/hk-license/hk-license-ui.html) and follow steps to install and activate provided license.
 

@@ -8,7 +8,7 @@ This is our Quiz REST Api implementation using Mule's APIKit router and [RAML 1.
  
 Quiz entity (_conveniently annotated for SQL_). Take a look to `org.hawkore.samples.api.quiz.entities.Quiz` for more details:
 - `id`: Unique identifier (`quizCache` key).
-- `email`: Surveyed's email.
+- `email`: Surveyed email.
 - `yes`: a YES response.
 - `no`: a NO response.
 - `na`: a Non Answered Quiz.
@@ -78,7 +78,7 @@ Retrieve global stats (**distributed atomic Longs**) as JSON:
 }
 ```
 
-## Ignite Configuration for kubernetes
+## Ignite Configuration for Kubernetes
 
 Configure IP finder on [ignite-config.xml](src/main/resources/ignite-config.xml) as `org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder` with the **kubernetes service name** to find server nodes and the **namespace**.
 

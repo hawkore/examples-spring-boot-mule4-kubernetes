@@ -1,14 +1,14 @@
 # Worker Mule Application
 
-Workers will listen on a distributed Queue for new Quiz to process:
+Workers will listen on a distributed Queue for new Quizzes to process:
 - Avoiding more than one Quiz per surveyed (**distributed LOCK scope**).
-- Updating Quiz with additional data.
-- Storing Quiz into Apache Ignite's **distributed database** (SQL Query Entity).
+- Updating Quizzes with additional data.
+- Storing Quizzes into Apache Ignite's **distributed database** (SQL Query Entity).
 - Updating global stats.
 
 ![kube-mule-ignite-worker](../docs/assets/kube-mule-ignite-worker.gif)
 
-Mule flow to listen on distributed Queue for new Quiz to process, ensuring uniqueness:
+Mule flow to listen on distributed Queue for new Quizzes to process, ensuring uniqueness:
 
 ![mule-worker-app-ingest-flow](../docs/assets/mule-worker-app-ingest-flow.png)
 
@@ -16,7 +16,7 @@ Mule flow to process Quizzes:
 
 ![mule-worker-app-process-flow](../docs/assets/mule-worker-app-process-flow.png)
 
-## Ignite Configuration for kubernetes
+## Ignite Configuration for Kubernetes
 
 Configure IP finder on [ignite-config.xml](src/main/resources/ignite-config.xml) as `org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder` with the **kubernetes service name** to find server nodes and the **namespace**.
 

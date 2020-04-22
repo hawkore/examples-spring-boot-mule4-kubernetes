@@ -29,7 +29,7 @@ public class Quiz implements Serializable {
 
     private static final long serialVersionUID = 1L;
     /**
-     * Surveyed's email
+     * Surveyed email
      */
     @QuerySqlField(index = true, inlineSize = 200)
     private String email;

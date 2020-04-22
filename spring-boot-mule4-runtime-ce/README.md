@@ -1,6 +1,6 @@
 ## Spring Boot Mule 4 Runtime CE
 
-Just a base docker image to run Mule Runtime as Spring boot application using [Spring boot starter for Mule 4](https://github.com/hawkore/mule4-spring-boot-starter).
+Just a base docker image to run Mule Runtime as Spring Boot application using [Spring Boot starter for Mule 4](https://github.com/hawkore/mule4-spring-boot-starter).
 
 In this example, it will allow us to easy run our Mule Applications as micro-services, and remote management Mule Runtime (metrics, log file, log levels...).
 

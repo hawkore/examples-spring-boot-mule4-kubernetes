@@ -1,6 +1,6 @@
 # Spring Boot Admin server
 
-To enable remote management for spring boot applications on kubernetes, follow below steps:
+To enable remote management for Spring Boot applications on Kubernetes, follow below steps:
 
 1. Add below maven dependencies to your Spring Boot Admin server application, see [pom.xml](pom.xml):
     ```
@@ -46,12 +46,12 @@ to your main Spring Boot Admin Server application class:
     }
     ```
    
-3. Create a kubernetes ConfigMap for Spring Boot Admin Server to tell how to find spring boot applications to manage:
+3. Create a Kubernetes ConfigMap for Spring Boot Admin Server to tell how to find Spring Boot applications to manage:
 
     **IMPORTANT**: In our case, the name of this ConfigMap must be equals to `sb-admin-server`, as defined in [application.properties](src/main/resources/application.properties) `spring.application.name` property.
 
     ```yaml
-    # Config Map for Spring Boot Admin Server to auto-discover spring boot applications to manage
+    # Config Map for Spring Boot Admin Server to auto-discover Spring Boot applications to manage
     apiVersion: v1
     kind: ConfigMap
     metadata:
@@ -71,7 +71,7 @@ to your main Spring Boot Admin Server application class:
 4. Kubernetes services grouping Spring Boot applications to manage must include label `spring-boot-managed: "true"`, for example:
 
     ```yaml
-    # Service (Load balancer) for Quiz REST Api: api endpoints, RAML console and spring boot management (actuator)
+    # Service (Load balancer) for Quiz REST Api: api endpoints, RAML console and Spring Boot management (actuator)
     apiVersion: v1
     kind: Service
     metadata:
@@ -92,14 +92,14 @@ to your main Spring Boot Admin Server application class:
         app: mule-api-app
     ```
 
-## Spring Boot Admin in Cluster - ignite Configuration for kubernetes
+## Spring Boot Admin in Cluster - ignite Configuration for Kubernetes
 
-Clustering Spring Boot Admin Server instances requires to provide a mechanism to share information about spring boot application instances across Spring Boot Admin Server nodes,
+Clustering Spring Boot Admin Server instances requires to provide a mechanism to share information about Spring Boot application instances across Spring Boot Admin Server nodes,
 so, as we want to work with Apache Ignite we have implemented an `EventeStore` backed by a distributed Apache Ignite cache, see `org.hawkore.springframework.boot.admin.cluster.IgniteEventStore` implementation for more details:
 
 ```java
 /**
- * Creates an event store for spring boot admin server in cluster
+ * Creates an event store for Spring Boot admin server in cluster
  *
  * @param igniteConnectionManager
  *     the ignite connection manager

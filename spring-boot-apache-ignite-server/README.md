@@ -2,7 +2,7 @@
 
 A simple implementation to run Apache Ignite into a Spring Boot application, see `org.hawkore.springframework.boot.ignite.config.IgniteConfig` for more details.
 
-## Ignite Configuration for kubernetes
+## Ignite Configuration for Kubernetes
 
 Set Apache Ignite node as `server node` (`clientMode=false`), enable persistence and configure IP finder on [ignite-config.xml](src/main/resources/ignite-config.xml) as `org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder` with the **kubernetes service name** to find server nodes and the **namespace**.
 
