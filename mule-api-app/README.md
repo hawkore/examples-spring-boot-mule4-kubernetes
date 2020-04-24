@@ -54,7 +54,7 @@ Mule flow to acquire Quizzes from HTTP POST request (/api/quiz) and publish them
 
 ### List Quizzes
 
-As simple as query distributed database (`quizCache`) using SQL:
+As simple as query the distributed database (`quizCache`) using SQL ([DataSense](https://docs.mulesoft.com/studio/7.4/datasense-concept) enabled):
 
 ![mule-api-app-list-quizs-flow](../docs/assets/mule-api-app-list-quizs-flow.png)
 
