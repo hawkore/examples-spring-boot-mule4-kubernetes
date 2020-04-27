@@ -36,6 +36,7 @@ import org.hawkore.springframework.boot.admin.cluster.IgniteNotificationTrigger;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,9 +53,6 @@ public class CommonConfig {
     private static final String DEFAULT_NAME_EVENT_STORE_CACHE = "spring-boot-admin-event-store";
     @Value("${spring.boot.admin.ignite.event-store:" + DEFAULT_NAME_EVENT_STORE_CACHE + "}")
     private String nameEventStore;
-    private static final String DEFAULT_NAME_SENT_NOTIFICATIONS_CACHE = "spring-boot-admin-sent-notifications";
-    @Value("${spring.boot.admin.ignite.notification-store:" + DEFAULT_NAME_SENT_NOTIFICATIONS_CACHE + "}")
-    private String nameNotificationStore;
 
     /**
      * Creates an event store for Spring Boot Admin server in cluster
@@ -77,29 +75,42 @@ public class CommonConfig {
     }
 
     /**
-     * Creates a Notification trigger for Spring Boot Admin server in cluster
-     *
-     * @param ignite
-     *     the ignite
-     * @param notifier
-     *     the notifier
-     * @param events
-     *     the events
-     * @return the notification trigger
+     * The type Notifier trigger configuration.
      */
-    @Bean(initMethod = "start", destroyMethod = "stop")
-    @ConditionalOnMissingBean(NotificationTrigger.class)
-    public NotificationTrigger notificationTrigger(@Autowired Ignite ignite,
-        @Autowired Notifier notifier,
-        @Autowired Publisher<InstanceEvent> events) {
-        CacheConfiguration<String, Long> config = new CacheConfiguration<>();
-        config.setName(nameNotificationStore);
-        config.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
-        config.setCacheMode(CacheMode.REPLICATED);
-        // we dont want to preserve old notifications for a long time...
-        // so set an expiry policy to auto remove them after a time
-        config.setExpiryPolicyFactory(CreatedExpiryPolicy.factoryOf(Duration.TEN_MINUTES));
-        return new IgniteNotificationTrigger(notifier, events, ignite.getOrCreateCache(config));
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnBean(Notifier.class)
+    public static class NotifierTriggerConfiguration {
+
+        private static final String DEFAULT_NAME_SENT_NOTIFICATIONS_CACHE = "spring-boot-admin-sent-notifications";
+        @Value("${spring.boot.admin.ignite.notification-store:" + DEFAULT_NAME_SENT_NOTIFICATIONS_CACHE + "}")
+        private String nameNotificationStore;
+
+        /**
+         * Creates a Notification trigger for Spring Boot Admin server in cluster
+         *
+         * @param ignite
+         *     the ignite
+         * @param notifier
+         *     the notifier
+         * @param events
+         *     the events
+         * @return the notification trigger
+         */
+        @Bean(initMethod = "start", destroyMethod = "stop")
+        @ConditionalOnMissingBean(NotificationTrigger.class)
+        public NotificationTrigger notificationTrigger(@Autowired Ignite ignite,
+            @Autowired Notifier notifier,
+            @Autowired Publisher<InstanceEvent> events) {
+            CacheConfiguration<String, Long> config = new CacheConfiguration<>();
+            config.setName(nameNotificationStore);
+            config.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
+            config.setCacheMode(CacheMode.REPLICATED);
+            // we dont want to preserve old notifications for a long time...
+            // so set an expiry policy to auto remove them after a time
+            config.setExpiryPolicyFactory(CreatedExpiryPolicy.factoryOf(Duration.TEN_MINUTES));
+            return new IgniteNotificationTrigger(notifier, events, ignite.getOrCreateCache(config));
+        }
+
     }
 
     /**
