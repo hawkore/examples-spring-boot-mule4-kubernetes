@@ -99,8 +99,8 @@ public class CommonConfig {
         @Bean(initMethod = "start", destroyMethod = "stop")
         @ConditionalOnMissingBean(NotificationTrigger.class)
         public NotificationTrigger notificationTrigger(@Autowired Ignite ignite,
-            @Autowired Notifier notifier,
-            @Autowired Publisher<InstanceEvent> events) {
+            Notifier notifier,
+            Publisher<InstanceEvent> events) {
             CacheConfiguration<String, Long> config = new CacheConfiguration<>();
             config.setName(nameNotificationStore);
             config.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
