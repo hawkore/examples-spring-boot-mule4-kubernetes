@@ -95,30 +95,35 @@ to your main Spring Boot Admin Server application class:
 ## Spring Boot Admin in Cluster - ignite Configuration for Kubernetes
 
 Clustering Spring Boot Admin Server instances requires to provide a mechanism to share information about Spring Boot application instances across Spring Boot Admin Server nodes,
-so, as we want to work with Apache Ignite we have implemented an `EventeStore` backed by a distributed Apache Ignite cache, see `org.hawkore.springframework.boot.admin.cluster.IgniteEventStore` implementation for more details:
+so, as we want to work with Apache Ignite we have implemented a `NotificationTrigger` to deduplicate notifications in cluster and an `EventeStore` backed by a distributed Apache Ignite cache, 
+see `org.hawkore.springframework.boot.admin.cluster.IgniteNotificationTrigger` and `org.hawkore.springframework.boot.admin.cluster.IgniteEventStore` implementations for more details:
 
 ```java
-/**
- * Creates an event store for Spring Boot admin server in cluster
- *
- * @param igniteConnectionManager
- *     the ignite connection manager
- * @param maxLogSizePerAggregate
- *     the max log size per aggregate, default 100
- * @return the ignite event store
- * @See de.codecentric.boot.admin.server.config.AdminServerAutoConfiguration
- */
 @Bean
 public IgniteEventStore eventStore(@Autowired Ignite ignite,
     @Value("${spring.boot.admin.server.max_events_per_aggregate:100}") int maxLogSizePerAggregate) {
-
-    CacheConfiguration<InstanceId, List<InstanceEvent>> config = new CacheConfiguration<>();
-    config.setName(SPRING_BOOT_ADMIN_SERVER_EVENT_STORE);
+    CacheConfiguration<String, List<InstanceEvent>> config = new CacheConfiguration<>();
+    config.setName(nameEventStore);
     config.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
     config.setCacheMode(CacheMode.REPLICATED);
-    return new IgniteEventStore(maxLogSizePerAggregate,
-        new IgniteCacheConcurrentMapWrapper<InstanceId, List<InstanceEvent>>(ignite, config));
+    return new IgniteEventStore(maxLogSizePerAggregate, ignite.getOrCreateCache(config));
 }
+
+@Bean(initMethod = "start", destroyMethod = "stop")
+@ConditionalOnMissingBean(NotificationTrigger.class)
+public NotificationTrigger notificationTrigger(@Autowired Ignite ignite,
+    @Autowired Notifier notifier,
+    @Autowired Publisher<InstanceEvent> events) {
+    CacheConfiguration<String, Long> config = new CacheConfiguration<>();
+    config.setName(nameNotificationStore);
+    config.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
+    config.setCacheMode(CacheMode.REPLICATED);
+    // we dont want to preserve old notifications for a long time...
+    // so set an expiry policy to auto remove them after a time
+    config.setExpiryPolicyFactory(CreatedExpiryPolicy.factoryOf(Duration.TEN_MINUTES));
+    return new IgniteNotificationTrigger(notifier, events, ignite.getOrCreateCache(config));
+}
+
 ```
 
 Configure IP finder on [ignite-config.xml](src/main/resources/ignite-config.xml) as `org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder` with the **kubernetes service name** to find other Spring Boot Admin server nodes and the **namespace**.

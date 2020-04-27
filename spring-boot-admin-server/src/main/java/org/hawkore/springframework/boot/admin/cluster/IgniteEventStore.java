@@ -31,7 +31,8 @@ import java.util.stream.Collectors;
 
 import de.codecentric.boot.admin.server.domain.events.InstanceEvent;
 import de.codecentric.boot.admin.server.domain.values.InstanceId;
-import de.codecentric.boot.admin.server.eventstore.ConcurrentMapEventStore;
+import de.codecentric.boot.admin.server.eventstore.InstanceEventPublisher;
+import de.codecentric.boot.admin.server.eventstore.InstanceEventStore;
 import de.codecentric.boot.admin.server.eventstore.OptimisticLockingException;
 import javax.cache.Cache.Entry;
 import javax.cache.event.EventType;
@@ -52,15 +53,17 @@ import static java.util.stream.Collectors.reducing;
 
 /**
  * Event-Store backed by a Apache IgniteCache for Spring Boot Admin storage over cluster
+ * <p>
+ * Just an adaptation of de.codecentric.boot.admin.server.eventstore.ConcurrentMapEventStore
  *
  * @author Manuel Núñez Sánchez (manuel.nunez@hawkore.com)
  */
-public class IgniteEventStore extends ConcurrentMapEventStore implements DisposableBean {
+public class IgniteEventStore extends InstanceEventPublisher implements InstanceEventStore, DisposableBean {
 
     private static final Logger log = LoggerFactory.getLogger(IgniteEventStore.class);
     private final QueryCursor<Entry<Serializable, Serializable>> continuousQueryCursor;
     private final int maxLogSizePerAggregate;
-    private final IgniteCache<InstanceId, List<InstanceEvent>> eventLogCache;
+    private final IgniteCache<String, List<InstanceEvent>> eventLogCache;
     private static final Comparator<InstanceEvent> byTimestampAndIdAndVersion = comparing(InstanceEvent::getTimestamp)
                                                                                     .thenComparing(
                                                                                         InstanceEvent::getInstance)
@@ -73,8 +76,8 @@ public class IgniteEventStore extends ConcurrentMapEventStore implements Disposa
      * @param eventLogs
      *     the event logs
      */
-    public IgniteEventStore(IgniteCacheConcurrentMapWrapper<InstanceId, List<InstanceEvent>> eventLogs) {
-        this(100, eventLogs);
+    public IgniteEventStore(IgniteCache<String, List<InstanceEvent>> eventLogCache) {
+        this(100, eventLogCache);
     }
 
     /**
@@ -85,11 +88,10 @@ public class IgniteEventStore extends ConcurrentMapEventStore implements Disposa
      * @param eventLogMap
      *     the event log
      */
-    public IgniteEventStore(int maxLogSizePerAggregate,
-        IgniteCacheConcurrentMapWrapper<InstanceId, List<InstanceEvent>> eventLogMap) {
-        super(maxLogSizePerAggregate, eventLogMap);
+    public IgniteEventStore(int maxLogSizePerAggregate, IgniteCache<String, List<InstanceEvent>> eventLogCache) {
         this.maxLogSizePerAggregate = maxLogSizePerAggregate;
-        this.eventLogCache = eventLogMap.getDelegate();
+        this.eventLogCache = eventLogCache;
+
         // create a monitor to update events on local instance from cluster udpates
         try {
             // Creating a continuous query.
@@ -99,20 +101,20 @@ public class IgniteEventStore extends ConcurrentMapEventStore implements Disposa
             // Local listener that is called locally when an update notification is received.
             qry.setLocalListener((evts) -> {
                 evts.forEach(e -> {
-                    if (e.getKey() instanceof InstanceId && (e.getEventType().equals(EventType.UPDATED)
-                                                                 || e.getEventType().equals(EventType.CREATED))) {
-                        InstanceId key = (InstanceId)e.getKey();
-                        List<InstanceEvent> val = (List<InstanceEvent>)e.getValue();
-                        List<InstanceEvent> oldValue = (List<InstanceEvent>)e.getOldValue();
-                        long lastKnownVersion = oldValue == null ? -1 : getLastVersion(oldValue);
-                        List<InstanceEvent> newEvents = val.stream().filter(ev -> ev.getVersion() > lastKnownVersion)
-                                                            .collect(Collectors.toList());
-                        IgniteEventStore.this.publish(newEvents);
+                    if (e.getEventType().equals(EventType.UPDATED) || e.getEventType().equals(EventType.CREATED)) {
+                        List<InstanceEvent> newEvents = (List<InstanceEvent>)e.getValue();
+                        List<InstanceEvent> oldEvents = (List<InstanceEvent>)e.getOldValue();
+                        long lastKnownVersion = oldEvents == null ? -1 : getLastVersion(oldEvents);
+                        newEvents = newEvents.stream().filter(ev -> ev.getVersion() > lastKnownVersion)
+                                        .collect(Collectors.toList());
+                        if (!newEvents.isEmpty()) {
+                            IgniteEventStore.this.publish(newEvents);
+                        }
                     }
                 });
             });
             // Executing the continuous query and preserve cursor without close it
-            this.continuousQueryCursor = eventLogMap.getDelegate().query(qry);
+            this.continuousQueryCursor = this.eventLogCache.query(qry);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -126,7 +128,7 @@ public class IgniteEventStore extends ConcurrentMapEventStore implements Disposa
     @Override
     public Flux<InstanceEvent> findAll() {
         return Flux.defer(() -> {
-            HashMap<InstanceId, List<InstanceEvent>> map = new HashMap<>();
+            HashMap<String, List<InstanceEvent>> map = new HashMap<>();
             eventLogCache.forEach(e -> map.put(e.getKey(), e.getValue()));
             return Flux.fromIterable(map.values()).flatMapIterable(Function.identity())
                        .sort(byTimestampAndIdAndVersion);
@@ -143,7 +145,7 @@ public class IgniteEventStore extends ConcurrentMapEventStore implements Disposa
     @Override
     public Flux<InstanceEvent> find(InstanceId id) {
         return Flux.defer(() -> {
-            List<InstanceEvent> events = eventLogCache.get(id);
+            List<InstanceEvent> events = eventLogCache.get(id.getValue());
             if (events != null) {
                 return Flux.fromIterable(events);
             }
@@ -160,41 +162,28 @@ public class IgniteEventStore extends ConcurrentMapEventStore implements Disposa
      */
     @Override
     public Mono<Void> append(List<InstanceEvent> events) {
-        return Mono.fromRunnable(() -> {
-            doAppend(events);
-        });
+        return Mono.fromRunnable(() -> doAppend(events));
     }
 
-    /**
-     * Do append boolean.
-     *
-     * @param events
-     *     the events
-     * @return the boolean
-     */
-    @Override
-    protected boolean doAppend(List<InstanceEvent> events) {
+    private boolean doAppend(List<InstanceEvent> events) {
         if (events.isEmpty()) {
             return true;
         }
 
-        InstanceId id = events.get(0).getInstance();
+        String instanceId = events.get(0).getInstance().getValue();
 
-        if (!events.stream().allMatch(event -> event.getInstance().equals(id))) {
+        if (!events.stream().allMatch(event -> event.getInstance().getValue().equals(instanceId))) {
             throw new IllegalArgumentException("'events' must only refer to the same instance.");
         }
 
-        Lock lock = eventLogCache.lock(id);
+        // create a distributed lock per instance Id
+        Lock lock = eventLogCache.lock(instanceId);
 
         try {
-
             lock.lock();
 
-            List<InstanceEvent> oldEvents = eventLogCache.get(id);
-
-            if (oldEvents == null) {
-                oldEvents = new ArrayList<>(maxLogSizePerAggregate + 1);
-            }
+            List<InstanceEvent> oldEvents = Optional.ofNullable(eventLogCache.get(instanceId))
+                                                .orElse(new ArrayList<>(maxLogSizePerAggregate + 1));
 
             long lastVersion = getLastVersion(oldEvents);
 
@@ -207,20 +196,23 @@ public class IgniteEventStore extends ConcurrentMapEventStore implements Disposa
 
             if (newEvents.size() > maxLogSizePerAggregate) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Threshold for {} reached. Compacting events", id);
+                    log.debug("Threshold for {} reached. Compacting events", instanceId);
                 }
                 compact(newEvents);
             }
 
             if (oldEvents.equals(newEvents)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Events are equals, nothing to do to log {}", events);
+                    log.debug("No new events to append {} ", events);
                 }
-                return true;
+                return false;
             }
 
-            eventLogCache.put(id, newEvents);
+            eventLogCache.put(instanceId, newEvents);
 
+            if (log.isDebugEnabled()) {
+                log.debug("Events appended to log {}", events);
+            }
             return true;
         } finally {
             lock.unlock();
@@ -237,6 +229,10 @@ public class IgniteEventStore extends ConcurrentMapEventStore implements Disposa
     private OptimisticLockingException createOptimisticLockException(InstanceEvent event, long lastVersion) {
         return new OptimisticLockingException(
             "Verison " + event.getVersion() + " was overtaken by " + lastVersion + " for " + event.getInstance());
+    }
+
+    protected static long getLastVersion(List<InstanceEvent> events) {
+        return events.isEmpty() ? -1 : events.get(events.size() - 1).getVersion();
     }
 
     /**

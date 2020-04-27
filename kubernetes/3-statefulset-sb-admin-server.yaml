@@ -43,7 +43,7 @@ spec:
           readinessProbe:
             tcpSocket:
               port: 8882
-            initialDelaySeconds: 60
+            initialDelaySeconds: 30
             periodSeconds: 10
           livenessProbe:
             tcpSocket:

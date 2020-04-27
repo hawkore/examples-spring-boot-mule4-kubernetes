@@ -21,17 +21,22 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import de.codecentric.boot.admin.server.domain.events.InstanceEvent;
-import de.codecentric.boot.admin.server.domain.values.InstanceId;
 import de.codecentric.boot.admin.server.domain.values.Registration;
+import de.codecentric.boot.admin.server.notify.NotificationTrigger;
+import de.codecentric.boot.admin.server.notify.Notifier;
 import de.codecentric.boot.admin.server.utils.jackson.RegistrationDeserializer;
+import javax.cache.expiry.CreatedExpiryPolicy;
+import javax.cache.expiry.Duration;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.cache.CacheAtomicityMode;
 import org.apache.ignite.cache.CacheMode;
 import org.apache.ignite.configuration.CacheConfiguration;
-import org.hawkore.springframework.boot.admin.cluster.IgniteCacheConcurrentMapWrapper;
 import org.hawkore.springframework.boot.admin.cluster.IgniteEventStore;
+import org.hawkore.springframework.boot.admin.cluster.IgniteNotificationTrigger;
+import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -44,13 +49,18 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class CommonConfig {
 
-    private static final String SPRING_BOOT_ADMIN_SERVER_EVENT_STORE = "SPRING_BOOT_ADMIN_SERVER_EVENT_STORE";
+    private static final String DEFAULT_NAME_EVENT_STORE_CACHE = "spring-boot-admin-event-store";
+    @Value("${spring.boot.admin.ignite.event-store:" + DEFAULT_NAME_EVENT_STORE_CACHE + "}")
+    private String nameEventStore;
+    private static final String DEFAULT_NAME_SENT_NOTIFICATIONS_CACHE = "spring-boot-admin-sent-notifications";
+    @Value("${spring.boot.admin.ignite.notification-store:" + DEFAULT_NAME_SENT_NOTIFICATIONS_CACHE + "}")
+    private String nameNotificationStore;
 
     /**
-     * Creates an event store for spring boot admin server in cluster
+     * Creates an event store for Spring Boot Admin server in cluster
      *
-     * @param igniteConnectionManager
-     *     the ignite connection manager
+     * @param ignite
+     *     the ignite instance
      * @param maxLogSizePerAggregate
      *     the max log size per aggregate, default 100
      * @return the ignite event store
@@ -59,13 +69,37 @@ public class CommonConfig {
     @Bean
     public IgniteEventStore eventStore(@Autowired Ignite ignite,
         @Value("${spring.boot.admin.server.max_events_per_aggregate:100}") int maxLogSizePerAggregate) {
-
-        CacheConfiguration<InstanceId, List<InstanceEvent>> config = new CacheConfiguration<>();
-        config.setName(SPRING_BOOT_ADMIN_SERVER_EVENT_STORE);
+        CacheConfiguration<String, List<InstanceEvent>> config = new CacheConfiguration<>();
+        config.setName(nameEventStore);
         config.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
         config.setCacheMode(CacheMode.REPLICATED);
-        return new IgniteEventStore(maxLogSizePerAggregate,
-            new IgniteCacheConcurrentMapWrapper<InstanceId, List<InstanceEvent>>(ignite, config));
+        return new IgniteEventStore(maxLogSizePerAggregate, ignite.getOrCreateCache(config));
+    }
+
+    /**
+     * Creates a Notification trigger for Spring Boot Admin server in cluster
+     *
+     * @param ignite
+     *     the ignite
+     * @param notifier
+     *     the notifier
+     * @param events
+     *     the events
+     * @return the notification trigger
+     */
+    @Bean(initMethod = "start", destroyMethod = "stop")
+    @ConditionalOnMissingBean(NotificationTrigger.class)
+    public NotificationTrigger notificationTrigger(@Autowired Ignite ignite,
+        @Autowired Notifier notifier,
+        @Autowired Publisher<InstanceEvent> events) {
+        CacheConfiguration<String, Long> config = new CacheConfiguration<>();
+        config.setName(nameNotificationStore);
+        config.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
+        config.setCacheMode(CacheMode.REPLICATED);
+        // we dont want to preserve old notifications for a long time...
+        // so set an expiry policy to auto remove them after a time
+        config.setExpiryPolicyFactory(CreatedExpiryPolicy.factoryOf(Duration.TEN_MINUTES));
+        return new IgniteNotificationTrigger(notifier, events, ignite.getOrCreateCache(config));
     }
 
     /**
