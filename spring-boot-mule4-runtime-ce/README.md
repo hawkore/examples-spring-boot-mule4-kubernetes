@@ -25,8 +25,8 @@ See [statefulSet configuration yaml for REST Api](../kubernetes/6-statefulset-mu
 
 ## Build
 
-Build docker image (`docker.hawkore.com/k8s/spring-boot-mule4-runtime-ce:latest`):
+Build docker image (`docker.hawkore.com/k8s/spring-boot-mule4-runtime-ce:latest`) with Mule Runtime CE 4.2.2 + hotfixes 5:
 
 ```bash
-mvn clean install -Pdocker
+mvn clean install -Pdocker -Dmule.bom.version=4.2.2-hf5
 ```

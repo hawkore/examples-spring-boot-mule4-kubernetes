@@ -127,7 +127,7 @@ Let's start by building the required artifacts.
 
 3. Build the required artifacts at once (Mule Applications and Docker images):
     ```bash
-    mvn clean install -Pdocker
+    mvn clean install -Pdocker -Dmule.bom.version=4.2.2-hf5
     ```
 4. Copy packaged Mule applications into `shared` folder:
     - `mule-api-app/target/mule-api-app-1.0.0-mule-application.jar` into `/opt/k8s/shared` directory  (on windows `c:\opt\k8s\shared`).

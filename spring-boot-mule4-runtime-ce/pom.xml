@@ -56,7 +56,8 @@ limitations under the License.
     <projectReactorVersion>3.2.12.RELEASE</projectReactorVersion>
     <projectReactorExtraVersion>3.1.6.RELEASE</projectReactorExtraVersion>
 
-    <spring-boot.mule.version>1.0.2</spring-boot.mule.version>
+    <!-- Spring boot starter for Mule -->
+    <mule4-spring-boot-starter.version>2.0.0</mule4-spring-boot-starter.version>
   </properties>
 
   <build>
@@ -175,7 +176,7 @@ limitations under the License.
     <dependency>
       <groupId>org.hawkore.springframework.boot</groupId>
       <artifactId>mule4-spring-boot-starter-ce</artifactId>
-      <version>${spring-boot.mule.version}</version>
+      <version>${mule4-spring-boot-starter.version}</version>
     </dependency>
 
     <!-- Required by Mule's APIKit-->
