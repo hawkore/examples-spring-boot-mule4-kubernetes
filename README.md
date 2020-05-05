@@ -31,7 +31,7 @@ and **manage** the entire spring-boot system with Spring Boot Admin Server.
 The goal of this example is to show you how to join **Mule's productivity** with the **Spring Boot ecosystem** 
 using the [Spring Boot Starter for Mule 4](https://github.com/hawkore/mule4-spring-boot-starter). 
 Gain **high availability** deploying **Mule Applications** as clustered micro-services on Kubernetes and perform **distributed data processing** 
-using the [Apache Ignite Connector for Mule 4](https://www.hawkore.com/plugins/product/pl-g-big-data/pl-t-ignite/pl-p-ignitev4). 
+using the [Apache Ignite Connector for Mule 4](https://blog.hawkore.com/2020/04/27/apache-ignite-connector-mule-starting/). 
 
 #### Architecture
 Our system to collect quizzes is composed of: 
