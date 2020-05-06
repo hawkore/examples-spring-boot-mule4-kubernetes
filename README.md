@@ -279,7 +279,7 @@ To full clean-up this sample from your computer, follow these steps:
 - About [Spring Boot Admin Server](https://github.com/codecentric/spring-boot-admin#codecentrics-spring-boot-admin).
 
 ## License
-Copyright 2020 HAWKORE, S.L.
+Copyright 2020 [HAWKORE, S.L.](https://www.hawkore.com)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
