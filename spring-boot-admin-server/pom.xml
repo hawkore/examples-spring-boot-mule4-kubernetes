@@ -55,7 +55,7 @@ limitations under the License.
     <maven.install.skip>true</maven.install.skip>
 
     <!-- Apache Ignite Version -->
-    <ignite.version>2.7.6</ignite.version>
+    <ignite.version>2.8.1</ignite.version>
     <h2.ignite.database.version>1.4.197</h2.ignite.database.version>
 
     <spring-boot.version>2.2.2.RELEASE</spring-boot.version>

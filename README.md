@@ -1,4 +1,4 @@
-# Distributed computation with Mule 4 and Kubernetes
+# Distributed computation with Apache Ignite and Mule 4 on Kubernetes
 
 In this example, we are going to create a system to collect quizzes. 
 We'll deploy it as a set of clustered micro-services on Kubernetes to ensure **high availability**, 
@@ -68,7 +68,7 @@ Workers will listen on a distributed Queue for new Quizzes to process:
      - [Docker Desktop](https://www.docker.com/products/docker-desktop), with enabled Kubernetes
      - Kubernetes ingress
      - Kubernetes dashboard (optional)
- - Optionally, [Anypoint Studio 7](https://www.mulesoft.com/lp/dl/studio) to work with Mule Applications.
+ - Optionally, [Anypoint Studio 7.5+](https://www.mulesoft.com/lp/dl/studio) to work with Mule Applications.
 
 #### Preparing the environment 
 
